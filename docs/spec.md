@@ -94,12 +94,12 @@ to Newest.
 | id | Name |
 |---|---|
 | `open` | Open |
-| `filter-tag-under-cursor` | Filter by tag under cursor |
+| `filter-tag-under-cursor` | Filter by this tag (the tag under the cursor) |
 | `like-this` | Show pages like this one (its collections and tags, included) |
 | `clear` | Clear |
 
-- **Filter by tag under cursor**: an inline `#tag`, or an entry of front matter `tags:`. Offered
-  only when the cursor is on one.
+- **Filter by this tag**: the tag under the cursor, an inline `#tag` or an entry of front matter
+  `tags:`. Offered only when the cursor is on one.
 - **Show pages like this one**: offered only when the active note is a page. Its tags match
   `all`, as the tag facet does by default.
 - Both open or focus the view and **replace** its browse state, keeping the sort.

@@ -25,7 +25,7 @@ export function registerCommands(plugin: PublicTxtFacetsPlugin): void {
 
 	plugin.addCommand({
 		id: 'filter-tag-under-cursor',
-		name: 'Filter by tag under cursor',
+		name: 'Filter by this tag',
 		editorCheckCallback: (checking, editor, ctx) => {
 			if (!ctx.file) return false;
 			const cursor = editor.getCursor();

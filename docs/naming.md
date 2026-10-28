@@ -31,11 +31,13 @@ plugin name. (The archive's "Open PublicTxt search" showed up as
 | id | Name in palette |
 |---|---|
 | `open` | PublicTxt Facets: Open |
-| `filter-tag-under-cursor` | PublicTxt Facets: Filter by tag under cursor |
+| `filter-tag-under-cursor` | PublicTxt Facets: Filter by this tag |
 | `like-this` | PublicTxt Facets: Show pages like this one |
 | `clear` | PublicTxt Facets: Clear |
 
-Command ids are stable API, like the plugin id: once released, don't rename them.
+Command ids are stable API, like the plugin id: once released, don't rename them. Names are
+only palette text and can change; hotkeys bind to ids. `filter-tag-under-cursor` keeps the id
+it had as "Filter by tag under cursor", renamed before release to need no lint exception.
 
 ## Code identifiers
 

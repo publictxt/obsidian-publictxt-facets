@@ -1,4 +1,4 @@
-// The tag under the editor cursor, for the "Filter by tag under cursor"
+// The tag under the editor cursor, for the "Filter by this tag"
 // command: an inline `#tag` from the metadata cache, or an entry of a front
 // matter `tags:` (or legacy `tag:`) key, inline `[a, b]` or as a block list.
 
