@@ -13,6 +13,8 @@ export interface SmokeView {
 	open(containerEl: HTMLElement): Promise<void>;
 	getState(): Record<string, unknown>;
 	setState(state: unknown, result: unknown): Promise<void>;
+	filterBy(inc: Record<string, string[]>): void;
+	clear(): void;
 }
 
 export type ViewClass = new (leaf: { app: unknown }, plugin: unknown) => SmokeView;

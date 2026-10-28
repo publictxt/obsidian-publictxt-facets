@@ -32,10 +32,14 @@ export default defineConfig(
 	...obsidianmd.configs.recommended,
 	{
 		rules: {
-			// The plugin's name is a proper noun, not a sentence.
+			// The plugin's name is a proper noun, not a sentence. The rule reads
+			// "cursor" as the Cursor editor's name; this one is the text cursor.
 			'obsidianmd/ui/sentence-case': [
 				'warn',
-				{ enforceCamelCaseLower: true, ignoreRegex: ['^PublicTxt Facets$'] },
+				{
+					enforceCamelCaseLower: true,
+					ignoreRegex: ['^PublicTxt Facets$', '^Filter by tag under cursor$'],
+				},
 			],
 			// getSettingDefinitions() (settings search, Obsidian 1.13+) isn't in
 			// the obsidian typings this repo builds against, and minAppVersion is

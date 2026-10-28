@@ -172,11 +172,29 @@ export class FacetsView extends ItemView {
 	}
 
 	clear(): void {
+		if (!this.built) return;
 		clearBrowseState(this.state);
 		this.titleEl.value = '';
 		this.sortEl.value = this.state.sort;
 		this.stateChanged();
 		this.titleEl.focus();
+	}
+
+	/**
+	 * Start over from a command: just these includes, the sort kept. Before
+	 * onOpen, the state is kept for onOpen to draw.
+	 */
+	filterBy(inc: Partial<Record<FacetKey, string[]>>): void {
+		const { sort } = this.state;
+		clearBrowseState(this.state);
+		this.state.sort = sort;
+		for (const d of FACETS) for (const v of inc[d.key] ?? []) this.state.facets[d.key].inc.add(v);
+		if (!this.built) {
+			this.app.workspace.requestSaveLayout();
+			return;
+		}
+		this.titleEl.value = '';
+		this.stateChanged();
 	}
 
 	/** Draw the whole state into the controls, then the results. */
