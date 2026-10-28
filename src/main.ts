@@ -1,6 +1,6 @@
 import { Plugin, WorkspaceLeaf } from 'obsidian';
-import { normalizeSettings, TxtFacetsSettings } from './settings';
-import { FacetsView, VIEW_TYPE } from './view';
+import { normalizeSettings, TxtFacetsSettings } from './settings.ts';
+import { FacetsView, VIEW_TYPE } from './view.ts';
 
 export default class TxtFacetsPlugin extends Plugin {
 	settings!: TxtFacetsSettings;
