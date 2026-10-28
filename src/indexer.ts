@@ -25,7 +25,7 @@ export async function pageFor(
 ): Promise<PageItem | null> {
 	if (!isPagePath(file, settings.excludedFolders)) return null;
 	const cache = app.metadataCache.getFileCache(file);
-	if (isUnpublished(cache?.frontmatter)) return null;
+	if (isUnpublished(cache?.frontmatter ?? {})) return null;
 	try {
 		const text = await app.vault.cachedRead(file);
 		return derivePage(file, cache, text, settings);

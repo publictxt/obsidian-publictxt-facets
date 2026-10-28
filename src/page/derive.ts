@@ -8,7 +8,7 @@
 // partials page-collections.html, categories.html and rating.html.
 
 import type { CachedMetadata } from 'obsidian';
-import type { TxtFacetsSettings } from '../settings.ts';
+import type { TagsFrom, TxtFacetsSettings } from '../settings.ts';
 import { deriveDates } from './dates.ts';
 import { fmString, fmTagList, fmValues, type FrontMatter } from './front-matter.ts';
 import { deriveSummary } from './plain-text.ts';
@@ -80,8 +80,8 @@ export function isPagePath(
 }
 
 /** Front matter rule: `publish: off` (or false, no, 0) hides a page. */
-export function isUnpublished(fm: FrontMatter | null | undefined): boolean {
-	const v = fm?.publish;
+export function isUnpublished(fm: FrontMatter): boolean {
+	const v = fm.publish;
 	if (typeof v === 'boolean') return !v;
 	if (typeof v === 'number' || typeof v === 'string') {
 		return UNPUBLISHED.has(String(v).trim().toLowerCase());
@@ -96,11 +96,11 @@ function dedupe(values: string[]): string[] {
 // ---- title, collections, categories, tags, rating, bookmarks -----------------
 
 export function deriveTitle(
-	fm: FrontMatter | null | undefined,
+	fm: FrontMatter,
 	cache: CachedMetadata | null | undefined,
 	basename: string,
 ): { title: string; fromH1: boolean } {
-	const explicit = fmString(fm?.title);
+	const explicit = fmString(fm.title);
 	if (explicit) return { title: explicit, fromH1: false };
 	const h1 = cache?.headings?.find((h) => h.level === 1)?.heading.trim();
 	if (h1) return { title: h1, fromH1: true };
@@ -119,13 +119,13 @@ export function topFolder(path: string): string {
  * Lower-case, deduped.
  */
 export function deriveCollections(
-	fm: FrontMatter | null | undefined,
+	fm: FrontMatter,
 	path: string,
 	hasBookmark: boolean,
 	fromFolder: boolean,
 ): string[] {
 	const raw = fromFolder ? [topFolder(path) || 'page'] : [];
-	raw.push(...fmValues(fm?.collections));
+	raw.push(...fmValues(fm.collections));
 	if (hasBookmark) raw.push('bookmarks');
 	return dedupe(raw.map((v) => v.toLowerCase()));
 }
@@ -136,10 +136,10 @@ export function deriveCollections(
  * and others are dropped; with an empty list, any value counts, lower-cased.
  */
 export function deriveCategories(
-	fm: FrontMatter | null | undefined,
+	fm: FrontMatter,
 	list: string[],
 ): string[] {
-	const raw = [...fmValues(fm?.categories), ...fmValues(fm?.category)];
+	const raw = [...fmValues(fm.categories), ...fmValues(fm.category)];
 	return dedupe(
 		raw.map((v) => {
 			const lower = v.toLowerCase();
@@ -159,27 +159,27 @@ export function normalizeTag(raw: string): string {
  * `#`, deduped in first-appearance order. Nested tags stay whole (`a/b`).
  */
 export function deriveTags(
-	fm: FrontMatter | null | undefined,
+	fm: FrontMatter,
 	cache: CachedMetadata | null | undefined,
-	from: TxtFacetsSettings['tagsFrom'],
+	from: TagsFrom,
 ): string[] {
 	const raw: string[] = [];
-	if (from !== 'inline') raw.push(...fmTagList(fm?.tags), ...fmTagList(fm?.tag));
+	if (from !== 'inline') raw.push(...fmTagList(fm.tags), ...fmTagList(fm.tag));
 	if (from !== 'frontmatter') raw.push(...(cache?.tags ?? []).map((t) => t.tag));
 	return dedupe(raw.map(normalizeTag));
 }
 
 /** A whole number 1–5, else 0 (unrated). */
-export function deriveRating(fm: FrontMatter | null | undefined): number {
-	const s = fmString(fm?.rating) ?? '';
+export function deriveRating(fm: FrontMatter): number {
+	const s = fmString(fm.rating) ?? '';
 	return /^[1-5]$/.test(s) ? Number(s) : 0;
 }
 
 const URL_RE = /^https?:\/\/\S+$/i;
 
 /** `bookmark:` / `bookmarks:`, a value or a list, http(s) URLs only. */
-export function deriveBookmarks(fm: FrontMatter | null | undefined): string[] {
-	const raw = [...fmValues(fm?.bookmark), ...fmValues(fm?.bookmarks)];
+export function deriveBookmarks(fm: FrontMatter): string[] {
+	const raw = [...fmValues(fm.bookmark), ...fmValues(fm.bookmarks)];
 	return dedupe(raw.filter((u) => URL_RE.test(u)));
 }
 
@@ -191,7 +191,7 @@ export function derivePage(
 	text: string,
 	opts: DeriveOptions,
 ): PageItem {
-	const fm: FrontMatter | undefined = cache?.frontmatter;
+	const fm: FrontMatter = cache?.frontmatter ?? {};
 	const { title, fromH1 } = deriveTitle(fm, cache, file.basename);
 	const bookmarks = deriveBookmarks(fm);
 	return {

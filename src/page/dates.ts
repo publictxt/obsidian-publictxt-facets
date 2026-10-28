@@ -80,18 +80,18 @@ export function parseTime(iso: string): number {
 }
 
 export function deriveDates(
-	fm: FrontMatter | null | undefined,
+	fm: FrontMatter,
 	path: string,
 	stat: { ctime: number; mtime: number },
 ): { created: string; updated: string } {
 	const fromPath = dateFromPath(path);
 	const created =
-		normalizeDate(fm?.created) ??
-		normalizeDate(fm?.date) ??
+		normalizeDate(fm.created) ??
+		normalizeDate(fm.date) ??
 		(fromPath ? dateOnlyToISO(fromPath) : toLocalISO(new Date(stat.ctime)));
 	let updated =
-		normalizeDate(fm?.updated) ??
-		normalizeDate(fm?.lastmod) ??
+		normalizeDate(fm.updated) ??
+		normalizeDate(fm.lastmod) ??
 		toLocalISO(new Date(stat.mtime));
 	const c = Date.parse(created);
 	const u = Date.parse(updated);

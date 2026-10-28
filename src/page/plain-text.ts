@@ -16,7 +16,9 @@ export function removeFirstH1(body: string): string {
 
 /**
  * Markdown to plain text: fences, link syntax, emphasis and structural
- * markers dropped, the words kept.
+ * markers dropped, the words kept. The order of the replacements matters:
+ * HTML before links, links before inline code and emphasis, line-start
+ * markers before whitespace is collapsed. Add a test before moving one.
  */
 export function plainText(md: string): string {
 	let s = md.replace(/\r\n?/g, '\n');

@@ -53,7 +53,6 @@ describe('which files are pages', () => {
 		}
 		assert.equal(isUnpublished({ publish: true }), false);
 		assert.equal(isUnpublished({}), false);
-		assert.equal(isUnpublished(undefined), false);
 	});
 });
 
