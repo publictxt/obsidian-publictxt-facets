@@ -10,11 +10,11 @@ Renamed from "Txt Facets" on 2026-10-28, before any release. In Obsidian's commu
 "txt" always means the file format (TXT Viewer, TodoTxt, Todo.txt Mode), so "Txt Facets"
 read as "facets for .txt files"; "PublicTxt" makes it a brand instead. A "Facet …" + noun
 name was avoided because **Facet Folders** (`grouped-property-explorer`) already exists. The
-repo keeps its name; the plugin id doesn't need to match it.
+repo was renamed to match, from `obsidian-txt-facets`; GitHub redirects the old URL.
 
 | Thing | Name | Notes |
 |---|---|---|
-| Repo | `obsidian-txt-facets` | |
+| Repo | `publictxt/obsidian-publictxt-facets` | Obsidian's `obsidian-<id>` pattern. Local folders keep their old names. |
 | Plugin `id` (`manifest.json`) | `publictxt-facets` | Stable forever once released. Must match the vault folder `.obsidian/plugins/publictxt-facets/`. Obsidian rejects ids containing `obsidian`. |
 | Display `name` | PublicTxt Facets | Shown in **Settings → Community plugins** and as the prefix of every command. |
 | `package.json` `name` | `publictxt-facets` | Same as the id; the package is private. |
