@@ -1,6 +1,6 @@
 import { Events, Plugin, WorkspaceLeaf } from 'obsidian';
 import { readAllPages } from './indexer.ts';
-import { PageIndex } from './page-index.ts';
+import { INDEX_CHANGED, PageIndex } from './page-index.ts';
 import { normalizeSettings, type TxtFacetsSettings } from './settings.ts';
 import { FacetsView, VIEW_TYPE } from './view.ts';
 
@@ -8,7 +8,7 @@ export default class TxtFacetsPlugin extends Plugin {
 	settings!: TxtFacetsSettings;
 	index = new PageIndex();
 	indexReady = false;
-	/** Triggers 'index-changed' whenever the index's contents change. */
+	/** Triggers INDEX_CHANGED whenever the index's contents change. */
 	events = new Events();
 
 	async onload() {
@@ -38,7 +38,7 @@ export default class TxtFacetsPlugin extends Plugin {
 	async buildIndex(): Promise<void> {
 		this.index.replaceAll(await readAllPages(this.app, this.settings));
 		this.indexReady = true;
-		this.events.trigger('index-changed');
+		this.events.trigger(INDEX_CHANGED);
 	}
 
 	// One view, reused: focus an open one, else open it in a new tab.

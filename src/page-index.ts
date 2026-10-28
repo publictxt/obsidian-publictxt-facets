@@ -4,6 +4,9 @@
 import { parseTime } from './page/dates.ts';
 import type { PageItem } from './page/derive.ts';
 
+/** The plugin's event when the index's contents change (plugin.events). */
+export const INDEX_CHANGED = 'index-changed';
+
 export class PageIndex {
 	private pages = new Map<string, PageItem>();
 	/** `created` as a number, parsed once per put rather than on every sort. */
