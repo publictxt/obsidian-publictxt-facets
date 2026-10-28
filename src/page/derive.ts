@@ -8,7 +8,7 @@
 // partials page-collections.html, categories.html and rating.html.
 
 import type { CachedMetadata } from 'obsidian';
-import type { TagsFrom, TxtFacetsSettings } from '../settings.ts';
+import type { TagsFrom, PublicTxtFacetsSettings } from '../settings.ts';
 import { deriveDates } from './dates.ts';
 import { fmString, fmTagList, fmValues, type FrontMatter } from './front-matter.ts';
 import { deriveSummary } from './plain-text.ts';
@@ -37,7 +37,7 @@ export interface FileInfo {
 }
 
 export type DeriveOptions = Pick<
-	TxtFacetsSettings,
+	PublicTxtFacetsSettings,
 	'collectionFromFolder' | 'tagsFrom' | 'categories'
 >;
 

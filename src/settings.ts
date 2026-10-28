@@ -4,7 +4,7 @@
 export type TagsFrom = 'both' | 'frontmatter' | 'inline';
 export type OpenIn = 'current' | 'tab' | 'split';
 
-export interface TxtFacetsSettings {
+export interface PublicTxtFacetsSettings {
 	/**
 	 * Vault-relative folders whose notes are not pages. Dot-folders
 	 * (`.trash`, `.git`, the config folder) never need listing: Obsidian
@@ -23,7 +23,7 @@ export interface TxtFacetsSettings {
 	cardsPerBatch: number;
 }
 
-export const DEFAULT_SETTINGS: TxtFacetsSettings = {
+export const DEFAULT_SETTINGS: PublicTxtFacetsSettings = {
 	excludedFolders: [],
 	collectionFromFolder: true,
 	tagsFrom: 'both',
@@ -51,12 +51,12 @@ function stringList(v: unknown): string[] | null {
  * default when missing or malformed, so a hand-edited file can't stop the
  * plugin from loading.
  */
-export function normalizeSettings(raw: unknown): TxtFacetsSettings {
+export function normalizeSettings(raw: unknown): PublicTxtFacetsSettings {
 	const r = (typeof raw === 'object' && raw !== null ? raw : {}) as Record<
 		string,
 		unknown
 	>;
-	const s: TxtFacetsSettings = {
+	const s: PublicTxtFacetsSettings = {
 		...DEFAULT_SETTINGS,
 		excludedFolders: [...DEFAULT_SETTINGS.excludedFolders],
 		categories: [...DEFAULT_SETTINGS.categories],

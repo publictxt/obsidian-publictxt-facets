@@ -1,4 +1,4 @@
-# Txt Facets — Naming
+# PublicTxt Facets — Naming
 
 The names this repo uses, once, so code, docs and UI agree. The archived repo
 (`obsidian-search-facets-archived`, shipped as `publictxt-search` 0.1.0) used other names; the
@@ -6,15 +6,21 @@ mapping is at the end so ported code can be renamed mechanically.
 
 ## Plugin identity
 
+Renamed from "Txt Facets" on 2026-10-28, before any release. In Obsidian's community list
+"txt" always means the file format (TXT Viewer, TodoTxt, Todo.txt Mode), so "Txt Facets"
+read as "facets for .txt files"; "PublicTxt" makes it a brand instead. A "Facet …" + noun
+name was avoided because **Facet Folders** (`grouped-property-explorer`) already exists. The
+repo keeps its name; the plugin id doesn't need to match it.
+
 | Thing | Name | Notes |
 |---|---|---|
 | Repo | `obsidian-txt-facets` | |
-| Plugin `id` (`manifest.json`) | `txt-facets` | Stable forever once released. Must match the vault folder `.obsidian/plugins/txt-facets/`. Obsidian rejects ids containing `obsidian`. |
-| Display `name` | Txt Facets | Shown in **Settings → Community plugins** and as the prefix of every command. |
-| `package.json` `name` | `txt-facets` | Same as the id; the package is private. |
-| View type | `txt-facets` | `VIEW_TYPE` in code. Also the hover-link source id. |
-| View display text | Txt Facets | Tab title. |
-| CSS root class | `.txt-facets` | Every rule in `styles.css` is scoped under it. |
+| Plugin `id` (`manifest.json`) | `publictxt-facets` | Stable forever once released. Must match the vault folder `.obsidian/plugins/publictxt-facets/`. Obsidian rejects ids containing `obsidian`. |
+| Display `name` | PublicTxt Facets | Shown in **Settings → Community plugins** and as the prefix of every command. |
+| `package.json` `name` | `publictxt-facets` | Same as the id; the package is private. |
+| View type | `publictxt-facets` | `VIEW_TYPE` in code. Also the hover-link source id. |
+| View display text | PublicTxt Facets | Tab title. |
+| CSS root class | `.publictxt-facets` | Every rule in `styles.css` is scoped under it. |
 
 ## Commands
 
@@ -24,10 +30,10 @@ plugin name. (The archive's "Open PublicTxt search" showed up as
 
 | id | Name in palette |
 |---|---|
-| `open` | Txt Facets: Open |
-| `filter-tag-under-cursor` | Txt Facets: Filter by tag under cursor |
-| `like-this` | Txt Facets: Show pages like this one |
-| `clear` | Txt Facets: Clear |
+| `open` | PublicTxt Facets: Open |
+| `filter-tag-under-cursor` | PublicTxt Facets: Filter by tag under cursor |
+| `like-this` | PublicTxt Facets: Show pages like this one |
+| `clear` | PublicTxt Facets: Clear |
 
 Command ids are stable API, like the plugin id: once released, don't rename them.
 
@@ -35,12 +41,12 @@ Command ids are stable API, like the plugin id: once released, don't rename them
 
 | Archive | Here | Why |
 |---|---|---|
-| `PublicTxtSearchPlugin` | `TxtFacetsPlugin` | plugin name |
-| `PublicTxtSearchSettings` | `TxtFacetsSettings` | plugin name |
-| `PublicTxtSearchSettingTab` | `TxtFacetsSettingTab` | plugin name |
+| `PublicTxtSearchPlugin` | `PublicTxtFacetsPlugin` | plugin name |
+| `PublicTxtSearchSettings` | `PublicTxtFacetsSettings` | plugin name |
+| `PublicTxtSearchSettingTab` | `PublicTxtFacetsSettingTab` | plugin name |
 | `SearchView` | `FacetsView` | facets are the point; "search" alone undersells filter-only browsing |
-| `VIEW_TYPE = "publictxt-search"` | `VIEW_TYPE = "txt-facets"` | |
-| `.publictxt-search` | `.txt-facets` | CSS scope |
+| `VIEW_TYPE = "publictxt-search"` | `VIEW_TYPE = "publictxt-facets"` | |
+| `.publictxt-search` | `.publictxt-facets` | CSS scope |
 | `SearchState` | `BrowseState` | the whole view's state; there's no search to start with |
 | (per-facet `{ inc, exc, match }`) | `FilterState` | one chip facet's state |
 

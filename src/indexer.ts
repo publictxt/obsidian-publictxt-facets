@@ -2,7 +2,7 @@
 
 import type { App, TFile } from 'obsidian';
 import { derivePage, isPagePath, isUnpublished, type PageItem } from './page/derive.ts';
-import type { TxtFacetsSettings } from './settings.ts';
+import type { PublicTxtFacetsSettings } from './settings.ts';
 
 /** Files read at once, before giving the UI a turn. */
 const READ_BATCH = 64;
@@ -21,7 +21,7 @@ const yieldToEventLoop = () =>
 export async function pageFor(
 	app: App,
 	file: TFile,
-	settings: TxtFacetsSettings,
+	settings: PublicTxtFacetsSettings,
 ): Promise<PageItem | null> {
 	if (!isPagePath(file, settings.excludedFolders)) return null;
 	const cache = app.metadataCache.getFileCache(file);
@@ -30,7 +30,7 @@ export async function pageFor(
 		const text = await app.vault.cachedRead(file);
 		return derivePage(file, cache, text, settings);
 	} catch (err) {
-		console.error(`Txt Facets: could not read ${file.path}`, err);
+		console.error(`PublicTxt Facets: could not read ${file.path}`, err);
 		return null;
 	}
 }
@@ -38,7 +38,7 @@ export async function pageFor(
 /** Every page in the vault, read in batches. */
 export async function readAllPages(
 	app: App,
-	settings: TxtFacetsSettings,
+	settings: PublicTxtFacetsSettings,
 ): Promise<PageItem[]> {
 	const files = app.vault.getMarkdownFiles();
 	const pages: PageItem[] = [];

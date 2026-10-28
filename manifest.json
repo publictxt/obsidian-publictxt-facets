@@ -1,9 +1,9 @@
 {
-	"id": "txt-facets",
-	"name": "Txt Facets",
+	"id": "publictxt-facets",
+	"name": "PublicTxt Facets",
 	"version": "0.0.1",
 	"minAppVersion": "1.7.2",
-	"description": "Browse notes by collection, category, tag and rating, with live counts and page cards.",
+	"description": "Browse any vault by collection, category, tag and rating: include or exclude with chips, live counts, page cards.",
 	"author": "Jaysen Naidoo",
 	"authorUrl": "https://github.com/jaysen",
 	"isDesktopOnly": false

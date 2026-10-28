@@ -35,7 +35,7 @@ export default defineConfig(
 			// The plugin's name is a proper noun, not a sentence.
 			'obsidianmd/ui/sentence-case': [
 				'warn',
-				{ enforceCamelCaseLower: true, ignoreRegex: ['^Txt Facets$'] },
+				{ enforceCamelCaseLower: true, ignoreRegex: ['^PublicTxt Facets$'] },
 			],
 		},
 	},

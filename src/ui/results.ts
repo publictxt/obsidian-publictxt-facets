@@ -15,9 +15,9 @@ export class Results {
 	/** `batchSize` is read on each batch, so a settings change applies at once. */
 	constructor(parent: HTMLElement, batchSize: () => number) {
 		this.batchSize = batchSize;
-		this.statusEl = parent.createEl('p', { cls: 'txt-facets-status' });
+		this.statusEl = parent.createEl('p', { cls: 'publictxt-facets-status' });
 		this.listEl = parent.createEl('ul', { cls: 'result-list' });
-		this.moreEl = parent.createEl('button', { text: 'Show more', cls: 'txt-facets-more' });
+		this.moreEl = parent.createEl('button', { text: 'Show more', cls: 'publictxt-facets-more' });
 		this.moreEl.addEventListener('click', () => this.showMore());
 		this.moreEl.hide();
 	}

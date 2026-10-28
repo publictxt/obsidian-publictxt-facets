@@ -1,7 +1,7 @@
 {
-	"name": "txt-facets",
+	"name": "publictxt-facets",
 	"version": "0.0.1",
-	"description": "Obsidian plugin: browse notes by collection, category, tag and rating, with live counts and page cards.",
+	"description": "Obsidian plugin: browse any vault by collection, category, tag and rating: include or exclude with chips, live counts, page cards.",
 	"main": "main.js",
 	"type": "module",
 	"scripts": {

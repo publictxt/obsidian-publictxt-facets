@@ -2,29 +2,29 @@
    names and rules follow publictxt-pages' assets/css/main.css, with the
    site's palette swapped for Obsidian's theme variables. */
 
-.txt-facets {
+.publictxt-facets {
 	padding: var(--size-4-4);
 }
 
-.txt-facets .muted {
+.publictxt-facets .muted {
 	color: var(--text-muted);
 }
 
 /* Bar: title filter, Compact, Clear */
 
-.txt-facets .txt-facets-bar {
+.publictxt-facets .publictxt-facets-bar {
 	display: flex;
 	align-items: center;
 	gap: var(--size-4-2);
 	margin-bottom: var(--size-4-3);
 }
 
-.txt-facets .txt-facets-title-filter {
+.publictxt-facets .publictxt-facets-title-filter {
 	flex: 1 1 auto;
 	min-width: 0;
 }
 
-.txt-facets .txt-facets-compact[aria-pressed='true'] {
+.publictxt-facets .publictxt-facets-compact[aria-pressed='true'] {
 	background: var(--interactive-accent);
 	color: var(--text-on-accent);
 }
@@ -32,33 +32,33 @@
 /* Layout: results, then the filter column; stacked, filters first, when
    the view is narrow (.is-narrow, set by the view's ResizeObserver). */
 
-.txt-facets .txt-facets-layout {
+.publictxt-facets .publictxt-facets-layout {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) 240px;
 	gap: var(--size-4-4);
 	align-items: start;
 }
 
-.txt-facets.is-narrow .txt-facets-layout {
+.publictxt-facets.is-narrow .publictxt-facets-layout {
 	grid-template-columns: minmax(0, 1fr);
 }
 
-.txt-facets.is-narrow .txt-facets-filters {
+.publictxt-facets.is-narrow .publictxt-facets-filters {
 	order: -1;
 }
 
-.txt-facets .txt-facets-status {
+.publictxt-facets .publictxt-facets-status {
 	margin: 0 0 var(--size-4-3);
 	color: var(--text-muted);
 }
 
-.txt-facets .txt-facets-more {
+.publictxt-facets .publictxt-facets-more {
 	margin-top: var(--size-4-3);
 }
 
 /* Filter column */
 
-.txt-facets .txt-facets-filters {
+.publictxt-facets .publictxt-facets-filters {
 	display: flex;
 	flex-direction: column;
 	gap: var(--size-4-4);
@@ -68,11 +68,11 @@
 	padding: 0.8rem 0.9rem;
 }
 
-.txt-facets .txt-facets-filters:empty {
+.publictxt-facets .publictxt-facets-filters:empty {
 	display: none;
 }
 
-.txt-facets .filter-group-head {
+.publictxt-facets .filter-group-head {
 	display: flex;
 	align-items: baseline;
 	justify-content: space-between;
@@ -80,7 +80,7 @@
 	margin-bottom: 0.45rem;
 }
 
-.txt-facets .filter-group-label {
+.publictxt-facets .filter-group-label {
 	font-size: 0.72rem;
 	font-weight: 600;
 	letter-spacing: 0.06em;
@@ -88,7 +88,7 @@
 	color: var(--text-muted);
 }
 
-.txt-facets .match-toggle {
+.publictxt-facets .match-toggle {
 	height: auto;
 	box-shadow: none;
 	font-size: 0.7rem;
@@ -100,13 +100,13 @@
 	cursor: pointer;
 }
 
-.txt-facets .match-toggle:hover {
+.publictxt-facets .match-toggle:hover {
 	border-color: var(--interactive-accent);
 }
 
 /* Chips */
 
-.txt-facets .chip {
+.publictxt-facets .chip {
 	display: inline-block;
 	background: var(--tag-background);
 	border: 1px solid var(--background-modifier-border);
@@ -120,8 +120,8 @@
 }
 
 /* Chips that are buttons: drop Obsidian's default button look. */
-.txt-facets button.chip,
-.txt-facets .filter-chip > button {
+.publictxt-facets button.chip,
+.publictxt-facets .filter-chip > button {
 	height: auto;
 	box-shadow: none;
 	font: inherit;
@@ -129,79 +129,79 @@
 	cursor: pointer;
 }
 
-.txt-facets .chip:hover {
+.publictxt-facets .chip:hover {
 	border-color: var(--interactive-accent);
 	color: var(--text-accent);
 }
 
-.txt-facets .chip .count {
+.publictxt-facets .chip .count {
 	color: var(--text-muted);
 	font-size: 0.7rem;
 	margin-left: 0.35rem;
 }
 
-.txt-facets .chip.active {
+.publictxt-facets .chip.active {
 	background: color-mix(in srgb, var(--interactive-accent) 18%, transparent);
 	border-color: var(--interactive-accent);
 	color: var(--text-accent);
 }
 
 /* A filter chip: a pill around a body button and a ✕ button. */
-.txt-facets span.filter-chip {
+.publictxt-facets span.filter-chip {
 	display: inline-flex;
 	align-items: baseline;
 }
 
-.txt-facets .filter-chip > button {
+.publictxt-facets .filter-chip > button {
 	color: inherit;
 	background: none;
 	border: 0;
 	padding: 0;
 }
 
-.txt-facets .filter-chip.empty:not(.active) {
+.publictxt-facets .filter-chip.empty:not(.active) {
 	opacity: 0.45;
 }
 
-.txt-facets .filter-chip.more {
+.publictxt-facets .filter-chip.more {
 	border-style: dashed;
 	color: var(--text-muted);
 }
 
-.txt-facets .filter-chip > .chip-x {
+.publictxt-facets .filter-chip > .chip-x {
 	margin-left: 0.3rem;
 	font-size: 0.55rem;
 	color: var(--text-muted);
 }
 
-.txt-facets .filter-chip > .chip-x:hover,
-.txt-facets .filter-chip.excluded > .chip-x {
+.publictxt-facets .filter-chip > .chip-x:hover,
+.publictxt-facets .filter-chip.excluded > .chip-x {
 	color: var(--text-accent);
 }
 
 /* ✕ on set chips; on off chips it keeps its space (no reflow) and shows on
    hover or keyboard focus. Touch has no hover, so there it's gone. */
-.txt-facets .filter-chip:not(.active):not(.excluded):not(:hover) > .chip-x:not(:focus-visible) {
+.publictxt-facets .filter-chip:not(.active):not(.excluded):not(:hover) > .chip-x:not(:focus-visible) {
 	opacity: 0;
 }
 
 @media (hover: none) {
-	.txt-facets .filter-chip:not(.active):not(.excluded) > .chip-x {
+	.publictxt-facets .filter-chip:not(.active):not(.excluded) > .chip-x {
 		display: none;
 	}
 }
 
-.txt-facets .filter-chip.excluded,
-.txt-facets .filter-chip.excluded:hover {
+.publictxt-facets .filter-chip.excluded,
+.publictxt-facets .filter-chip.excluded:hover {
 	border-style: dashed;
 	color: var(--text-muted);
 }
 
-.txt-facets .filter-chip.excluded > .chip-body {
+.publictxt-facets .filter-chip.excluded > .chip-body {
 	text-decoration: line-through;
 }
 
-.txt-facets .chip-collection {
+.publictxt-facets .chip-collection {
 	background: var(--background-modifier-hover);
 	color: var(--text-accent);
 	text-transform: uppercase;
@@ -210,21 +210,21 @@
 	font-weight: 600;
 }
 
-.txt-facets .chip-link {
+.publictxt-facets .chip-link {
 	font-family: var(--font-monospace);
 }
 
-.txt-facets .chip-row {
+.publictxt-facets .chip-row {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 0.35rem;
 }
 
-.txt-facets .bookmark-links {
+.publictxt-facets .bookmark-links {
 	margin-top: 0.4rem;
 }
 
-.txt-facets .rating {
+.publictxt-facets .rating {
 	color: var(--text-accent);
 	letter-spacing: 0.05em;
 	white-space: nowrap;
@@ -233,7 +233,7 @@
 
 /* Cards */
 
-.txt-facets .result-list {
+.publictxt-facets .result-list {
 	list-style: none;
 	margin: 0;
 	padding: 0;
@@ -242,26 +242,26 @@
 	gap: 0.75rem;
 }
 
-.txt-facets .page-card {
+.publictxt-facets .page-card {
 	background: var(--background-secondary);
 	border: 1px solid var(--background-modifier-border);
 	border-radius: var(--radius-m);
 	padding: 0.9rem 1.1rem;
 }
 
-.txt-facets .page-card time,
-.txt-facets .page-card-dates > .muted {
+.publictxt-facets .page-card time,
+.publictxt-facets .page-card-dates > .muted {
 	font-size: 0.8rem;
 }
 
-.txt-facets .page-card-head {
+.publictxt-facets .page-card-head {
 	display: flex;
 	align-items: baseline;
 	justify-content: space-between;
 	gap: 0.75rem;
 }
 
-.txt-facets .page-card-title {
+.publictxt-facets .page-card-title {
 	font-weight: 600;
 	font-size: 1.02rem;
 	min-width: 0;
@@ -269,7 +269,7 @@
 	cursor: pointer;
 }
 
-.txt-facets .page-card-collections {
+.publictxt-facets .page-card-collections {
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: flex-end;
@@ -278,24 +278,24 @@
 	max-width: 50%;
 }
 
-.txt-facets .page-card-summary {
+.publictxt-facets .page-card-summary {
 	margin: 0.4rem 0 0.5rem;
 	color: var(--text-muted);
 	font-size: 0.9rem;
 	overflow-wrap: anywhere;
 }
 
-.txt-facets .page-card .chip-row {
+.publictxt-facets .page-card .chip-row {
 	margin-top: 0.5rem;
 }
 
 /* Compact: one line per card, title then collections, date and stars. */
 
-.txt-facets .result-list.dense {
+.publictxt-facets .result-list.dense {
 	gap: 0.35rem;
 }
 
-.txt-facets .dense .page-card {
+.publictxt-facets .dense .page-card {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: baseline;
@@ -303,16 +303,16 @@
 	padding: 0.45rem 0.9rem;
 }
 
-.txt-facets .dense .page-card-head {
+.publictxt-facets .dense .page-card-head {
 	display: contents;
 }
 
-.txt-facets .dense .page-card-title {
+.publictxt-facets .dense .page-card-title {
 	flex: 1 1 16rem;
 	font-size: 0.95rem;
 }
 
-.txt-facets .dense .page-card .chip-row,
-.txt-facets .dense .page-card-summary {
+.publictxt-facets .dense .page-card .chip-row,
+.publictxt-facets .dense .page-card-summary {
 	display: none;
 }

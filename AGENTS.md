@@ -1,4 +1,4 @@
-# Txt Facets — working notes
+# PublicTxt Facets — working notes
 
 An Obsidian plugin for browsing a vault by facets, sharing the concepts of
 [PublicTxt-Pages](https://github.com/publictxt/publictxt-pages). Rewritten from
@@ -61,7 +61,7 @@ Run test, build and lint before committing. CI runs all three on Node 24.
 - Don't name view methods after Obsidian's lifecycle (`open`, `close`, `load`, `unload`,
   `onload`, …): some, like `View.open`, aren't in `obsidian.d.ts`, so TypeScript won't
   warn, and the view silently never opens.
-- Every CSS rule is scoped under `.txt-facets`; class names follow the site's `main.css`.
+- Every CSS rule is scoped under `.publictxt-facets`; class names follow the site's `main.css`.
 - Code style: tabs, single quotes; match the file you're in.
 - Lint config allows no inline disables; change `eslint.config.mts` with a reason instead.
 

@@ -12,12 +12,12 @@ import {
 	toggleInclude,
 	type FacetKey,
 } from '../filter.ts';
-import type TxtFacetsPlugin from '../main.ts';
+import type PublicTxtFacetsPlugin from '../main.ts';
 import { INDEX_CHANGED } from '../page-index.ts';
 import { renderFilters } from './filters.ts';
 import { Results } from './results.ts';
 
-export const VIEW_TYPE = 'txt-facets';
+export const VIEW_TYPE = 'publictxt-facets';
 
 /** Below this width the filters move above the results. */
 const NARROW_PX = 640;
@@ -27,7 +27,7 @@ const TYPING_MS = 200;
 // filter column, and handles every click through data-* attributes.
 // Saved state, rating and sort arrive in later slices (docs/spec.md).
 export class FacetsView extends ItemView {
-	private plugin: TxtFacetsPlugin;
+	private plugin: PublicTxtFacetsPlugin;
 	private state = emptyBrowseState();
 	/** One line per card. Not saved yet: that's the saved-state slice. */
 	private compact = false;
@@ -42,7 +42,7 @@ export class FacetsView extends ItemView {
 	private filtersEl!: HTMLElement;
 	private results!: Results;
 
-	constructor(leaf: WorkspaceLeaf, plugin: TxtFacetsPlugin) {
+	constructor(leaf: WorkspaceLeaf, plugin: PublicTxtFacetsPlugin) {
 		super(leaf);
 		this.plugin = plugin;
 		// Opening a note from here joins the tab's back/forward history.
@@ -54,7 +54,7 @@ export class FacetsView extends ItemView {
 	}
 
 	getDisplayText(): string {
-		return 'Txt Facets';
+		return 'PublicTxt Facets';
 	}
 
 	getIcon(): string {
@@ -86,12 +86,12 @@ export class FacetsView extends ItemView {
 	private build(): void {
 		const root = this.contentEl;
 		root.empty();
-		root.addClass('txt-facets');
+		root.addClass('publictxt-facets');
 
-		const bar = root.createDiv({ cls: 'txt-facets-bar' });
+		const bar = root.createDiv({ cls: 'publictxt-facets-bar' });
 		this.titleEl = bar.createEl('input', {
 			type: 'search',
-			cls: 'txt-facets-title-filter',
+			cls: 'publictxt-facets-title-filter',
 			attr: { placeholder: 'Filter by title', 'aria-label': 'Filter by title' },
 		});
 		const typed = (this.typed = debounce(() => {
@@ -100,24 +100,24 @@ export class FacetsView extends ItemView {
 		}, TYPING_MS, true));
 		this.titleEl.addEventListener('input', () => typed());
 
-		const compact = bar.createEl('button', { text: 'Compact', cls: 'txt-facets-compact' });
+		const compact = bar.createEl('button', { text: 'Compact', cls: 'publictxt-facets-compact' });
 		compact.setAttribute('aria-pressed', 'false');
 		compact.addEventListener('click', () => {
 			this.compact = !this.compact;
 			compact.setAttribute('aria-pressed', String(this.compact));
 			this.results.setCompact(this.compact);
 		});
-		bar.createEl('button', { text: 'Clear', cls: 'txt-facets-clear' })
+		bar.createEl('button', { text: 'Clear', cls: 'publictxt-facets-clear' })
 			.addEventListener('click', () => this.clear());
 
-		const layout = root.createDiv({ cls: 'txt-facets-layout' });
+		const layout = root.createDiv({ cls: 'publictxt-facets-layout' });
 		// aria-live: screen readers announce the new count after each change.
 		const resultsEl = layout.createDiv({
-			cls: 'txt-facets-results',
+			cls: 'publictxt-facets-results',
 			attr: { 'aria-live': 'polite' },
 		});
 		this.results = new Results(resultsEl, () => this.plugin.settings.cardsPerBatch);
-		this.filtersEl = layout.createDiv({ cls: 'txt-facets-filters' });
+		this.filtersEl = layout.createDiv({ cls: 'publictxt-facets-filters' });
 		this.results.setStatus('Reading notes…');
 	}
 

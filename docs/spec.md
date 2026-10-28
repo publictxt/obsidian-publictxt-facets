@@ -1,4 +1,4 @@
-# Txt Facets — Spec
+# PublicTxt Facets — Spec
 
 What the plugin does. Why in `intent.md`, names in `naming.md`. The plugin never writes to the
 vault.
@@ -62,7 +62,7 @@ holds a `FilterState` (`{ inc, exc, match }`) per chip facet. The chip facets ar
 
 ## View
 
-- One `ItemView` (`txt-facets`), reused. It opens as a tab from the ribbon or the **Open**
+- One `ItemView` (`publictxt-facets`), reused. It opens as a tab from the ribbon or the **Open**
   command.
 - **Top**: title filter, sort menu, **Compact** toggle, **Clear**.
 - **Status line**: `N pages — <filters>`.

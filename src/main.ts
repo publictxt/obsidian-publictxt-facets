@@ -1,11 +1,11 @@
 import { Events, Plugin, WorkspaceLeaf } from 'obsidian';
 import { readAllPages } from './indexer.ts';
 import { INDEX_CHANGED, PageIndex } from './page-index.ts';
-import { normalizeSettings, type TxtFacetsSettings } from './settings.ts';
+import { normalizeSettings, type PublicTxtFacetsSettings } from './settings.ts';
 import { FacetsView, VIEW_TYPE } from './ui/view.ts';
 
-export default class TxtFacetsPlugin extends Plugin {
-	settings!: TxtFacetsSettings;
+export default class PublicTxtFacetsPlugin extends Plugin {
+	settings!: PublicTxtFacetsSettings;
 	index = new PageIndex();
 	indexReady = false;
 	/** Triggers INDEX_CHANGED whenever the index's contents change. */
@@ -17,7 +17,7 @@ export default class TxtFacetsPlugin extends Plugin {
 		this.registerView(VIEW_TYPE, (leaf) => new FacetsView(leaf, this));
 		// Lists the view under Settings → Page preview; previews need Ctrl/Cmd.
 		this.registerHoverLinkSource(VIEW_TYPE, {
-			display: 'Txt Facets',
+			display: 'PublicTxt Facets',
 			defaultMod: true,
 		});
 
