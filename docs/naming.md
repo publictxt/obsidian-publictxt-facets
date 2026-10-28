@@ -54,11 +54,11 @@ because that is the model the plugin reproduces.
 
 | Term | Meaning |
 |---|---|
-| **page** | A Markdown note that the plugin indexes. Not every `.md` file is one: notes in excluded folders and repo housekeeping files (`README*`, `LICENSE*`, …) aren't pages. |
-| **page record** | The derived data for one page: `PageItem` (title, collections, section, categories, tags, rating, dates, summary, bookmarks). |
+| **page** | A Markdown note that the plugin indexes. Not every `.md` file is one: notes in excluded folders and repo housekeeping files (`README.md`, `LICENSE.md`, `CONTRIBUTING.md`), and `publish: off` notes aren't pages. |
+| **page record** | The derived data for one page: `PageItem` (title, collections, categories, tags, rating, dates, summary, bookmarks). |
 | **derive / derivation** | Working out a page record from the file, its front matter and Obsidian's metadata cache, following fixed rules. The rules live in `derive.ts`. |
 | **collection** | What kind of page it is. Several per page: its top-level folder (an option; `page` at root), each `collections:` value, and `bookmarks` if it has a bookmark URL. Lower-case. Replaces the archive's **type**. |
-| **section** | A page's top-level folder (`""` at root). Informational. |
+| **top folder** | A page's top-level folder (`""` at root), the source of its folder collection. `topFolder()` in code; the site calls it the section. |
 | **category** | A broad subject (`category:` / `categories:`). Limited to the settings list, or any value when the list is empty. |
 | **tag** | Lowercased, no `#`. Front matter tags, inline `#hashtags`, or both (setting), as one set. |
 | **rating** | Front matter `rating:` 1–5, or unrated. Filtered as a minimum; sorted with unrated as 2.5. |
