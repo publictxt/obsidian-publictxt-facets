@@ -9,19 +9,28 @@ import {
 	emptyBrowseState,
 	filterPages,
 	press,
+	ratingChoices,
+	ratingCounts,
+	ratingLabel,
 	sortedKeys,
 	toggleInclude,
 	type FilterState,
 } from '../src/filter.ts';
 
-function page(title: string, collections: string[], tags: string[] = [], categories: string[] = []): PageItem {
+function page(
+	title: string,
+	collections: string[],
+	tags: string[] = [],
+	categories: string[] = [],
+	rating = 0,
+): PageItem {
 	return {
 		path: title + '.md',
 		title,
 		collections,
 		categories,
 		tags,
-		rating: 0,
+		rating,
 		created: '',
 		updated: '',
 		summary: '',
@@ -143,6 +152,41 @@ suite('chip counts', () => {
 	});
 });
 
+suite('rating', () => {
+	const RATED = [
+		page('Five', ['wiki'], [], [], 5),
+		page('Four', ['wiki'], [], [], 4),
+		page('Two', ['blog'], [], [], 2),
+		page('None', ['blog']),
+	];
+	test('a number is a minimum; unrated is exact', () => {
+		const s = emptyBrowseState();
+		s.rating = '4';
+		assert.deepEqual(titles(filterPages(RATED, s)), ['Five', 'Four']);
+		s.rating = 'unrated';
+		assert.deepEqual(titles(filterPages(RATED, s)), ['None']);
+	});
+	test('chips offer the ratings present, best first, then unrated', () => {
+		assert.deepEqual(ratingChoices(RATED), ['5', '4', '2', 'unrated']);
+		assert.deepEqual(ratingChoices(PAGES), []);
+	});
+	test('chip counts are cumulative, and counted without the rating filter', () => {
+		const s = emptyBrowseState();
+		s.rating = '5';
+		s.facets.collection.inc = new Set(['wiki']);
+		const counts = ratingCounts(filterPages(RATED, s, 'rating'));
+		assert.equal(counts.get('5'), 1);
+		assert.equal(counts.get('4'), 2);
+		assert.equal(counts.get('1'), 2);
+		assert.equal(counts.get('unrated'), 0);
+	});
+	test('labels as on the site', () => {
+		assert.equal(ratingLabel('5'), '★5');
+		assert.equal(ratingLabel('3'), '★3+');
+		assert.equal(ratingLabel('unrated'), 'Unrated');
+	});
+});
+
 suite('status line', () => {
 	test('title, includes joined by mode, excludes', () => {
 		const s = emptyBrowseState();
@@ -150,13 +194,16 @@ suite('status line', () => {
 		s.facets.collection.inc = new Set(['wiki', 'blog']);
 		s.facets.tag.inc = new Set(['a', 'b']);
 		s.facets.tag.exc = new Set(['c']);
-		assert.deepEqual(describe(s), ['“net”', 'wiki or blog', '#a · #b', 'not #c']);
+		s.rating = '4';
+		assert.deepEqual(describe(s), ['“net”', 'wiki or blog', '#a · #b', 'not #c', '★4+']);
 	});
 	test('clear resets everything, match modes included', () => {
 		const s = emptyBrowseState();
 		s.title = 'x';
 		s.facets.tag.match = 'any';
 		s.facets.tag.inc.add('a');
+		s.rating = '3';
+		s.sort = 'title';
 		clearBrowseState(s);
 		assert.deepEqual(s, emptyBrowseState());
 	});

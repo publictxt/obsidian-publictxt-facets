@@ -41,6 +41,8 @@ holds a `FilterState` (`{ inc, exc, match }`) per chip facet. The chip facets ar
 - **Default match**: collection `any`, category `any`, tag `all`. The all/any toggle shows once
   two or more values are included.
 - **Rating**: one chip at a time, 5…1 or unrated. A number means "at least this many stars".
+  Only the ratings some page has are offered; with no rated pages the group is hidden. It comes
+  first in the filter column, as on the site's search page.
 - All filters combine with AND.
 
 ### Counts
@@ -59,6 +61,8 @@ holds a `FilterState` (`{ inc, exc, match }`) per chip facet. The chip facets ar
 
 `created` (Newest, default), `created asc` (Oldest), `title` (A→Z), `title desc`, `updated`
 (Recently updated), `updated asc`, `rating` (Top rated), `rating asc`. Unrated pages sort as 2.5.
+Ties go to title A→Z (to path, when sorting by title). The menu is in the bar; Clear returns it
+to Newest.
 
 ## View
 
@@ -104,6 +108,6 @@ Each slice is usable in the test vault (`test-vaults/txt-cpy`) before the next s
 1. ✓ Scaffold: names applied, an empty view opens, a deploy script.
 2. ✓ Page records (`src/page/`, with tests), plus a plain list sorted by Newest.
 3. ✓ Cards and compact mode.
-4. Chip facets: include/exclude, all/any, counts. Title filter.
-5. Rating and the sort menu.
+4. ✓ Chip facets: include/exclude, all/any, counts. Title filter.
+5. ✓ Rating and the sort menu.
 6. Live updates, saved state, settings tab, commands.

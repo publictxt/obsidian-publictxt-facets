@@ -1,29 +1,40 @@
-// The filter column: a group per chip facet, with counts, ✕ to exclude and
-// the all/any toggle (publictxt-pages' facets.js filterChip and matchToggle).
-// Drawn whole on every change; the view handles clicks through the data-*
-// attributes set here.
+// The filter column: the rating chips, then a group per chip facet with
+// counts, ✕ to exclude and the all/any toggle (publictxt-pages' facets.js
+// ratingChips, filterChip and matchToggle). Drawn whole on every change; the
+// view handles clicks through the data-* attributes set here.
 
 import {
 	chipState,
 	FACETS,
+	ratingLabel,
 	type BrowseState,
 	type Counts,
 	type FacetDef,
 	type FacetKey,
 	type FilterState,
+	type RatingFilter,
 } from '../filter.ts';
 
 /** Chips per facet before "+N more", as on the site's lists. */
 export const CHIP_LIMIT = 20;
 
-export function renderFilters(
-	el: HTMLElement,
-	state: BrowseState,
-	order: Record<FacetKey, string[]>,
-	counts: Counts,
-	expanded: Set<FacetKey>,
-): void {
+/** What the filter column draws from. */
+export interface FilterColumn {
+	state: BrowseState;
+	/** Chip order per facet, from totals across all pages. */
+	order: Record<FacetKey, string[]>;
+	counts: Counts;
+	/** Facets showing every chip. */
+	expanded: Set<FacetKey>;
+	/** Rating chips to offer; none hides the group. */
+	ratings: RatingFilter[];
+	ratingCounts: Map<RatingFilter, number>;
+}
+
+export function renderFilters(el: HTMLElement, col: FilterColumn): void {
+	const { state, order, counts, expanded } = col;
 	el.empty();
+	renderRating(el, col);
 	for (const d of FACETS) {
 		const names = order[d.key];
 		if (!names.length) continue; // no values at all, e.g. categories unused
@@ -54,6 +65,34 @@ export function renderFilters(
 		} else if (shown.length < names.length) {
 			moreChip(row, d.key, `+${names.length - shown.length} more`);
 		}
+	}
+}
+
+// One rating chip at a time; pressing the set one clears it.
+function renderRating(el: HTMLElement, col: FilterColumn): void {
+	if (!col.ratings.length) return;
+	const group = el.createDiv({ cls: 'filter-group' });
+	group.createDiv({ cls: 'filter-group-head' }).createSpan({
+		cls: 'filter-group-label',
+		text: 'Rating',
+	});
+	const row = group.createDiv({ cls: 'chip-row' });
+	for (const r of col.ratings) {
+		const on = col.state.rating === r;
+		const count = col.ratingCounts.get(r) ?? 0;
+		const cls = ['chip', 'filter-chip'];
+		if (on) cls.push('active');
+		if (count === 0 && !on) cls.push('empty');
+		const b = row.createEl('button', {
+			cls,
+			text: ratingLabel(r),
+			attr: {
+				'data-rating': r,
+				'aria-pressed': String(on),
+				title: on ? 'Click to clear' : `Click to show ${ratingLabel(r)}`,
+			},
+		});
+		b.createSpan({ cls: 'count', text: String(count) });
 	}
 }
 

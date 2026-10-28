@@ -1,8 +1,9 @@
-// Filtering pages by facets and title (docs/spec.md → Filtering). Pure, and
-// a port of publictxt-pages' assets/js/facets.js: the same chip states,
-// match modes and counting rules.
+// Filtering pages by facets, rating and title (docs/spec.md → Filtering).
+// Pure, and a port of publictxt-pages' assets/js/facets.js: the same chip
+// states, match modes and counting rules.
 
 import type { PageItem } from './page/derive.ts';
+import { DEFAULT_SORT, type Sort } from './sort.ts';
 
 export type FacetKey = 'collection' | 'category' | 'tag';
 export type Match = 'all' | 'any';
@@ -33,16 +34,25 @@ export interface FilterState {
 	match: Match;
 }
 
-/** Everything that decides which pages show. Rating and sort come later. */
+/**
+ * The rating filter: a minimum ("4" = four stars or more), `unrated`, or
+ * `''` for none. The site's `?rating=` values.
+ */
+export type RatingFilter = '' | '1' | '2' | '3' | '4' | '5' | 'unrated';
+export const UNRATED = 'unrated';
+
+/** Everything that decides which pages show, and in what order. */
 export interface BrowseState {
 	title: string;
 	facets: Record<FacetKey, FilterState>;
+	rating: RatingFilter;
+	sort: Sort;
 }
 
 export function emptyBrowseState(): BrowseState {
 	const facets = {} as Record<FacetKey, FilterState>;
 	for (const d of FACETS) facets[d.key] = { inc: new Set(), exc: new Set(), match: d.match };
-	return { title: '', facets };
+	return { title: '', facets, rating: '', sort: DEFAULT_SORT };
 }
 
 export function clearBrowseState(state: BrowseState): void {
@@ -91,21 +101,56 @@ export function matches(f: FilterState, values: string[], ownIncludes = true): b
 		: [...f.inc].every((v) => values.includes(v));
 }
 
+/** Whether a page's rating (0 = unrated) passes the rating filter. */
+export function passesRating(r: RatingFilter, rating: number): boolean {
+	if (!r) return true;
+	return r === UNRATED ? rating === 0 : rating >= Number(r);
+}
+
 /**
- * Pages passing the title filter and every facet. `skipIncludesOf` leaves one
- * facet's includes out, for its addsPages counts.
+ * Pages passing the title filter, every facet and the rating, in the order
+ * given. `skip` leaves out one facet's includes (its addsPages counts), or the
+ * rating filter (the rating chips' counts).
  */
 export function filterPages(
 	pages: PageItem[],
 	state: BrowseState,
-	skipIncludesOf?: FacetKey,
+	skip?: FacetKey | 'rating',
 ): PageItem[] {
 	const q = state.title.trim().toLowerCase();
+	const rating = skip === 'rating' ? '' : state.rating;
 	return pages.filter(
 		(p) =>
 			(!q || p.title.toLowerCase().includes(q)) &&
-			FACETS.every((d) => matches(state.facets[d.key], p[d.field], d.key !== skipIncludesOf)),
+			passesRating(rating, p.rating) &&
+			FACETS.every((d) => matches(state.facets[d.key], p[d.field], d.key !== skip)),
 	);
+}
+
+/**
+ * The rating chips to offer: the ratings any page has, best first, then
+ * unrated. None at all when no page is rated, so the group hides.
+ */
+export function ratingChoices(pages: PageItem[]): RatingFilter[] {
+	const rated = new Set(pages.map((p) => p.rating).filter((r) => r > 0));
+	if (!rated.size) return [];
+	const out = (['5', '4', '3', '2', '1'] as const).filter((r) => rated.has(Number(r)));
+	return pages.some((p) => !p.rating) ? [...out, UNRATED] : out;
+}
+
+/** Per rating chip: pages with that rating or better (unrated: exactly). */
+export function ratingCounts(pages: PageItem[]): Map<RatingFilter, number> {
+	const counts = new Map<RatingFilter, number>();
+	for (const r of ['5', '4', '3', '2', '1', UNRATED] as const) {
+		counts.set(r, pages.filter((p) => passesRating(r, p.rating)).length);
+	}
+	return counts;
+}
+
+/** "★5", "★4+", "Unrated", as the site labels them. */
+export function ratingLabel(r: RatingFilter): string {
+	if (r === UNRATED) return 'Unrated';
+	return r === '5' ? '★5' : `★${r}+`;
 }
 
 export type Counts = Record<FacetKey, Map<string, number>>;
@@ -152,5 +197,6 @@ export function describe(state: BrowseState): string[] {
 		if (inc) out.push(inc);
 		for (const v of f.exc) out.push('not ' + d.prefix + v);
 	}
+	if (state.rating) out.push(ratingLabel(state.rating));
 	return out;
 }
