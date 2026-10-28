@@ -35,13 +35,18 @@ export const DEFAULT_SETTINGS: PublicTxtFacetsSettings = {
 const TAGS_FROM: readonly TagsFrom[] = ['both', 'frontmatter', 'inline'];
 const OPEN_IN: readonly OpenIn[] = ['current', 'tab', 'split'];
 
-// A list setting: an array of strings, or one string split on newlines and
-// commas. Blank entries are dropped.
-function stringList(v: unknown): string[] | null {
+/** One entry per line. */
+const LINES = /\r?\n/;
+/** One entry per line, or separated by commas. */
+const LINES_OR_COMMAS = /\r?\n|,/;
+
+// A list setting: an array of strings, or one string (as the settings tab's
+// text areas give it) split by `separator`. Blank entries are dropped.
+function stringList(v: unknown, separator: RegExp): string[] | null {
 	const raw = Array.isArray(v)
 		? v.filter((x): x is string => typeof x === 'string')
 		: typeof v === 'string'
-			? v.split(/\r?\n|,/)
+			? v.split(separator)
 			: null;
 	return raw && raw.map((x) => x.trim()).filter(Boolean);
 }
@@ -61,8 +66,9 @@ export function normalizeSettings(raw: unknown): PublicTxtFacetsSettings {
 		excludedFolders: [...DEFAULT_SETTINGS.excludedFolders],
 		categories: [...DEFAULT_SETTINGS.categories],
 	};
-	s.excludedFolders = stringList(r.excludedFolders) ?? s.excludedFolders;
-	s.categories = stringList(r.categories) ?? s.categories;
+	// Folder names can hold commas; category names can't.
+	s.excludedFolders = stringList(r.excludedFolders, LINES) ?? s.excludedFolders;
+	s.categories = stringList(r.categories, LINES_OR_COMMAS) ?? s.categories;
 	if (typeof r.collectionFromFolder === 'boolean') {
 		s.collectionFromFolder = r.collectionFromFolder;
 	}

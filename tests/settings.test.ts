@@ -38,13 +38,13 @@ describe('normalizeSettings', () => {
 		assert.equal(s.cardsPerBatch, 20);
 	});
 
-	test('list settings accept one string, split on newlines and commas', () => {
+	test('list settings accept one string: folders by line, categories by line or comma', () => {
 		const s = normalizeSettings({
-			excludedFolders: 'media\n settings/Templates \n',
-			categories: 'Tech, Science',
+			excludedFolders: 'media\n settings/Templates \nA, B\n',
+			categories: 'Tech, Science\nArt',
 		});
-		assert.deepEqual(s.excludedFolders, ['media', 'settings/Templates']);
-		assert.deepEqual(s.categories, ['Tech', 'Science']);
+		assert.deepEqual(s.excludedFolders, ['media', 'settings/Templates', 'A, B']);
+		assert.deepEqual(s.categories, ['Tech', 'Science', 'Art']);
 	});
 
 	test('defaults are copied, not shared', () => {
