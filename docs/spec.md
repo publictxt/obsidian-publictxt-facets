@@ -29,8 +29,9 @@ A **page** is any `.md` file except:
 
 ## Filtering
 
-`BrowseState` is the whole view's state: `{ title, collection, category, tag, rating, sort }`.
-Each chip facet holds a `FilterState`: `{ inc, exc, match }`.
+`BrowseState` is the whole view's state: `{ title, facets, rating, sort }`, where `facets`
+holds a `FilterState` (`{ inc, exc, match }`) per chip facet. The chip facets are one table,
+`FACETS` in `src/filter.ts`.
 
 - **Title filter**: title contains the text, case-insensitive.
 - **Chip facets** (collection, category, tag): a chip is off, included or excluded. Click the chip
@@ -50,6 +51,8 @@ Each chip facet holds a `FilterState`: `{ inc, exc, match }`.
   - for an `all` facet, its own includes
   - for an `any` facet, *not* its own includes, since picking another value adds pages
 - Excluded chips show no number. Zero-count chips are dimmed, not hidden.
+- A facet shows its first 20 chips, plus any that are set; "+N more" shows the rest.
+- A facet with no values at all (categories, in a vault that doesn't use them) is hidden.
 - **Rating chip number**: pages with at least that rating, counted without the rating filter.
 
 ## Sort
@@ -63,7 +66,8 @@ Each chip facet holds a `FilterState`: `{ inc, exc, match }`.
   command.
 - **Top**: title filter, sort menu, **Compact** toggle, **Clear**.
 - **Status line**: `N pages — <filters>`.
-- **Filters column**: one group per facet. It goes above the results when the view is narrow.
+- **Filters column**: one group per facet, right of the results. It goes above them when the
+  view is narrower than 640px.
 - **Cards**: title, collections, dates, rating, summary, tag chips, bookmark ↗. Compact cards are
   one line: title, date, stars.
 - **Opening**: a card's title opens the note. Ctrl/Cmd-click opens it in a new tab, and hovering

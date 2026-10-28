@@ -29,8 +29,11 @@ src/
     plain-text.ts   Markdown → plain text, summary
   indexer.ts      reads the vault into page records (the Obsidian side of page/)
   page-index.ts   page records by path, sorting
+  filter.ts       facet table (FACETS), chip states, all/any, counts. Pure
   ui/             the view and its parts (Obsidian DOM)
-    view.ts         the view: state, layout, events
+    view.ts         the view: BrowseState, layout, one delegated click handler
+    filters.ts      the filter column
+    results.ts      status line, cards in batches, Show more
     cards.ts        the page card
 tests/            node:test, one file per module; helpers/fake-cache.ts stands in for MetadataCache
 scripts/deploy.mjs
