@@ -28,8 +28,9 @@ src/
     front-matter.ts reading YAML values
     plain-text.ts   Markdown → plain text, summary
   indexer.ts      reads the vault into page records (the Obsidian side of page/)
-  page-index.ts   page records by path, sorting
-  filter.ts       facet table (FACETS), chip states, all/any, counts. Pure
+  page-index.ts   page records by path, sorted() with cached date keys
+  sort.ts         the sort vocabulary (SORTS), normaliseSort/parseSort. Pure
+  filter.ts       BrowseState, facet table (FACETS), chip states, all/any, rating, counts. Pure
   ui/             the view and its parts (Obsidian DOM)
     view.ts         the view: BrowseState, layout, one delegated click handler
     filters.ts      the filter column

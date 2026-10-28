@@ -119,6 +119,16 @@ Not taken from the site for now: the year/month timeline filter, per-folder defa
   *any* facet's counts leave out its own includes, because picking another value *adds* pages.
   This is easy to get wrong, so it's written down here.
 
+## Related plugins
+
+Checked 2026-10-28 against Obsidian's community list. **Facet Folders**
+(`grouped-property-explorer`) is the only other plugin that talks about facets: a
+tree navigator that shows properties and tags as virtual folders, edits front matter in bulk,
+and groups properties in Bases. It has no combined filtering, no include/exclude, no counts
+across facets, no cards, no sorting of results. Its README points at **Property Explorer**
+for plain property browsing. PublicTxt Facets' niche is combinable, counted, read-only
+filtering with cards.
+
 ## Open questions
 
 1. **Text search later: Obsidian's or our own?** Obsidian's core search has no public API. A
