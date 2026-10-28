@@ -35,18 +35,24 @@ export async function pageFor(
 	}
 }
 
-/** Every page in the vault, read in batches. */
+/**
+ * Every page in the vault, read in batches. `isCurrent` is checked after
+ * each batch: once it's false a newer build has started, and this one stops
+ * and returns null.
+ */
 export async function readAllPages(
 	app: App,
 	settings: PublicTxtFacetsSettings,
-): Promise<PageItem[]> {
+	isCurrent: () => boolean = () => true,
+): Promise<PageItem[] | null> {
 	const files = app.vault.getMarkdownFiles();
 	const pages: PageItem[] = [];
 	for (let i = 0; i < files.length; i += READ_BATCH) {
 		const batch = files.slice(i, i + READ_BATCH);
 		const read = await Promise.all(batch.map((f) => pageFor(app, f, settings)));
+		if (!isCurrent()) return null;
 		for (const page of read) if (page) pages.push(page);
 		if (i + READ_BATCH < files.length) await yieldToEventLoop();
 	}
-	return pages;
+	return isCurrent() ? pages : null;
 }
