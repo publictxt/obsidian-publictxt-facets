@@ -1,22 +1,44 @@
-import { ItemView, Keymap, WorkspaceLeaf } from 'obsidian';
-import { card } from './cards.ts';
-import type { PageItem } from '../page/derive.ts';
+import { debounce, ItemView, Keymap, WorkspaceLeaf } from 'obsidian';
+import {
+	chipCounts,
+	clearBrowseState,
+	countValues,
+	describe,
+	emptyBrowseState,
+	FACETS,
+	filterPages,
+	press,
+	sortedKeys,
+	toggleInclude,
+	type FacetKey,
+} from '../filter.ts';
 import type TxtFacetsPlugin from '../main.ts';
 import { INDEX_CHANGED } from '../page-index.ts';
+import { renderFilters } from './filters.ts';
+import { Results } from './results.ts';
 
 export const VIEW_TYPE = 'txt-facets';
 
-// The facets view. For now every page as a card, newest first, in batches;
-// filters and saved state arrive in later slices (docs/spec.md → Build order).
+/** Below this width the filters move above the results. */
+const NARROW_PX = 640;
+const TYPING_MS = 200;
+
+// The facets view: owns the browse state, lays out the bar, results and
+// filter column, and handles every click through data-* attributes.
+// Saved state, rating and sort arrive in later slices (docs/spec.md).
 export class FacetsView extends ItemView {
 	private plugin: TxtFacetsPlugin;
-	/** The current results, and how many of them have cards. */
-	private pages: PageItem[] = [];
-	private shown = 0;
+	private state = emptyBrowseState();
 	/** One line per card. Not saved yet: that's the saved-state slice. */
 	private compact = false;
-	private listEl: HTMLElement | null = null;
-	private moreEl: HTMLElement | null = null;
+	/** Facets showing every chip, not just the first CHIP_LIMIT. */
+	private expanded = new Set<FacetKey>();
+	/** Chip order per facet, from totals across all pages. */
+	private order = {} as Record<FacetKey, string[]>;
+
+	private titleEl!: HTMLInputElement;
+	private filtersEl!: HTMLElement;
+	private results!: Results;
 
 	constructor(leaf: WorkspaceLeaf, plugin: TxtFacetsPlugin) {
 		super(leaf);
@@ -36,66 +58,109 @@ export class FacetsView extends ItemView {
 	}
 
 	async onOpen(): Promise<void> {
-		this.contentEl.addClass('txt-facets');
-		this.registerEvent(
-			this.plugin.events.on(INDEX_CHANGED, () => this.render()),
-		);
-		// One click and one hover listener serve every card.
+		this.build();
+		this.registerEvent(this.plugin.events.on(INDEX_CHANGED, () => this.onIndexChanged()));
+		// One click and one hover listener serve every card and chip.
 		this.registerDomEvent(this.contentEl, 'click', (evt) => this.onClick(evt));
 		this.registerDomEvent(this.contentEl, 'mouseover', (evt) => this.onHover(evt));
-		this.render();
+		// The view's width, not the window's, decides the layout in a pane.
+		const observer = new ResizeObserver(() => {
+			this.contentEl.toggleClass('is-narrow', this.contentEl.clientWidth < NARROW_PX);
+		});
+		observer.observe(this.contentEl);
+		this.register(() => observer.disconnect());
+		if (this.plugin.indexReady) this.onIndexChanged();
 	}
 
-	private render(): void {
+	/** The parts that stay put: the bar, the results and the filter column. */
+	private build(): void {
 		const root = this.contentEl;
 		root.empty();
-		this.listEl = this.moreEl = null;
-		if (!this.plugin.indexReady) {
-			root.createEl('p', { text: 'Reading notes…', cls: 'muted' });
-			return;
-		}
-		this.pages = this.plugin.index.newest();
-		this.shown = 0;
+		root.addClass('txt-facets');
 
 		const bar = root.createDiv({ cls: 'txt-facets-bar' });
-		const n = this.pages.length;
-		bar.createSpan({ text: `${n} page${n === 1 ? '' : 's'}`, cls: 'muted' });
-		const toggle = bar.createEl('button', { text: 'Compact', cls: 'txt-facets-compact' });
-		toggle.setAttribute('aria-pressed', String(this.compact));
-		toggle.addEventListener('click', () => {
-			this.compact = !this.compact;
-			toggle.setAttribute('aria-pressed', String(this.compact));
-			this.listEl?.toggleClass('dense', this.compact);
+		this.titleEl = bar.createEl('input', {
+			type: 'search',
+			cls: 'txt-facets-title-filter',
+			attr: { placeholder: 'Filter by title', 'aria-label': 'Filter by title' },
 		});
+		const typed = debounce(() => {
+			this.state.title = this.titleEl.value;
+			this.run();
+		}, TYPING_MS, true);
+		this.titleEl.addEventListener('input', typed);
 
-		this.listEl = root.createEl('ul', { cls: 'result-list' });
-		this.listEl.toggleClass('dense', this.compact);
-		this.moreEl = root.createEl('button', { text: 'Show more', cls: 'txt-facets-more' });
-		this.moreEl.addEventListener('click', () => this.showMore());
-		this.showMore();
+		const compact = bar.createEl('button', { text: 'Compact', cls: 'txt-facets-compact' });
+		compact.setAttribute('aria-pressed', 'false');
+		compact.addEventListener('click', () => {
+			this.compact = !this.compact;
+			compact.setAttribute('aria-pressed', String(this.compact));
+			this.results.setCompact(this.compact);
+		});
+		bar.createEl('button', { text: 'Clear', cls: 'txt-facets-clear' })
+			.addEventListener('click', () => this.clear());
+
+		const layout = root.createDiv({ cls: 'txt-facets-layout' });
+		this.results = new Results(layout.createDiv({ cls: 'txt-facets-results' }), () =>
+			this.plugin.settings.cardsPerBatch,
+		);
+		this.filtersEl = layout.createDiv({ cls: 'txt-facets-filters' });
+		this.results.setStatus('Reading notes…');
 	}
 
-	/** Cards for the next batch of results. */
-	private showMore(): void {
-		const batch = this.pages.slice(this.shown, this.shown + this.plugin.settings.cardsPerBatch);
-		for (const page of batch) this.listEl?.appendChild(card(page));
-		this.shown += batch.length;
-		this.moreEl?.toggle(this.shown < this.pages.length);
+	clear(): void {
+		clearBrowseState(this.state);
+		this.titleEl.value = '';
+		this.run();
+		this.titleEl.focus();
 	}
 
-	/** The path on a card title under the event, if any. */
-	private titlePath(evt: MouseEvent): { link: HTMLElement; path: string } | null {
-		const link = (evt.target as HTMLElement).closest<HTMLElement>('a.page-card-title');
-		const path = link?.getAttribute('data-path');
-		return link && path ? { link, path } : null;
+	private onIndexChanged(): void {
+		const totals = countValues(this.plugin.index.newest());
+		for (const d of FACETS) this.order[d.key] = sortedKeys(totals[d.key]);
+		this.run();
+	}
+
+	/** Filter, count and draw: after every change to the state or the index. */
+	private run(): void {
+		if (!this.plugin.indexReady) return;
+		const pages = this.plugin.index.newest();
+		const shown = filterPages(pages, this.state);
+		const counts = chipCounts(pages, this.state, shown);
+		renderFilters(this.filtersEl, this.state, this.order, counts, this.expanded);
+		const n = shown.length;
+		const parts = describe(this.state);
+		this.results.setStatus(
+			`${n} page${n === 1 ? '' : 's'}` + (parts.length ? ` — ${parts.join(' · ')}` : ''),
+		);
+		this.results.show(shown, this.state.facets.tag.inc);
+	}
+
+	private onClick(evt: MouseEvent): void {
+		const el = (evt.target as HTMLElement).closest<HTMLElement>(
+			'[data-path], [data-tag], [data-facet], [data-match], [data-more]',
+		);
+		if (!el) return;
+		const { path, tag, facet, value, match, more } = el.dataset;
+		if (path !== undefined) return this.open(path, evt);
+		if (tag !== undefined) toggleInclude(this.state.facets.tag, tag);
+		else if (facet && value !== undefined) {
+			press(this.state.facets[facet as FacetKey], value, el.dataset.x !== undefined);
+		} else if (match) {
+			const f = this.state.facets[match as FacetKey];
+			f.match = f.match === 'all' ? 'any' : 'all';
+		} else if (more) {
+			const key = more as FacetKey;
+			if (!this.expanded.delete(key)) this.expanded.add(key);
+		}
+		this.run();
 	}
 
 	// A title opens its note: where the setting says, or in a new tab (or
 	// split) with Ctrl/Cmd held. Bookmark chips are real links and open in
 	// the browser on their own.
-	private onClick(evt: MouseEvent): void {
-		const hit = this.titlePath(evt);
-		const file = hit ? this.app.vault.getFileByPath(hit.path) : null;
+	private open(path: string, evt: MouseEvent): void {
+		const file = this.app.vault.getFileByPath(path);
 		if (!file) return;
 		evt.preventDefault();
 		const { openIn } = this.plugin.settings;
@@ -105,14 +170,15 @@ export class FacetsView extends ItemView {
 
 	// Page Preview on a title, as for any internal link.
 	private onHover(evt: MouseEvent): void {
-		const hit = this.titlePath(evt);
-		if (!hit) return;
+		const link = (evt.target as HTMLElement).closest<HTMLElement>('a.page-card-title');
+		const path = link?.dataset.path;
+		if (!link || !path) return;
 		this.app.workspace.trigger('hover-link', {
 			event: evt,
 			source: VIEW_TYPE,
 			hoverParent: this,
-			targetEl: hit.link,
-			linktext: hit.path,
+			targetEl: link,
+			linktext: path,
 			sourcePath: '',
 		});
 	}

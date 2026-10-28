@@ -1,7 +1,7 @@
 // The page card: a port of publictxt-pages' assets/js/cards.js and its date
 // and bookmark partials. Built with DOM calls, not an HTML string, so no text
-// from the vault is ever parsed as markup. Tag chips are plain labels until
-// the facets slice makes them filters.
+// from the vault is ever parsed as markup. Tag chips are filter buttons; the
+// view handles them through `data-tag`.
 
 import type { PageItem } from '../page/derive.ts';
 
@@ -44,9 +44,10 @@ export function bookmarkLabel(url: string): string {
 
 /**
  * A page card. The title carries the page's path in `data-path`; the view
- * opens the note and shows hover previews from it.
+ * opens the note and shows hover previews from it. Tags in `activeTags` show
+ * as included.
  */
-export function card(page: PageItem): HTMLLIElement {
+export function card(page: PageItem, activeTags: Set<string>): HTMLLIElement {
 	const li = createEl('li', { cls: 'page-card' });
 
 	const head = li.createDiv({ cls: 'page-card-head' });
@@ -94,7 +95,14 @@ export function card(page: PageItem): HTMLLIElement {
 	const tags = page.tags.slice(0, CARD_TAGS);
 	if (tags.length) {
 		const row = li.createDiv({ cls: 'chip-row' });
-		for (const t of tags) row.createSpan({ cls: 'chip', text: '#' + t });
+		for (const t of tags) {
+			const on = activeTags.has(t);
+			row.createEl('button', {
+				cls: ['chip', 'filter-chip', ...(on ? ['active'] : [])],
+				text: '#' + t,
+				attr: { 'data-tag': t, 'aria-pressed': String(on) },
+			});
+		}
 	}
 	return li;
 }
