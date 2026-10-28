@@ -88,7 +88,8 @@ Three things follow from that:
 6. **No full-text search to start.** Facets first, no search engine and no dependency.
 7. **Title filter.** A text box that keeps cards whose title contains the typed text
    (case-insensitive), combined with the facets. It's a cheap stand-in until text search arrives.
-8. **Platform.** Cross-platform (desktop and mobile). Developed on Linux, so no PowerShell-only
+8. **Platform.** Cross-platform (desktop and mobile). Obsidian 1.13 or later (2026-10-29), for the
+   declarative settings tab and its settings search. Developed on Linux, so no PowerShell-only
    scripts.
 9. **Template tooling kept.** ESLint with `eslint-plugin-obsidianmd` flags what Obsidian's
    community-plugin review rejects, and the GitHub workflows lint on push and build releases from

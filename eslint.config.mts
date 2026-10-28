@@ -37,10 +37,6 @@ export default defineConfig(
 				'warn',
 				{ enforceCamelCaseLower: true, ignoreRegex: ['^PublicTxt Facets$'] },
 			],
-			// getSettingDefinitions() (settings search, Obsidian 1.13+) isn't in
-			// the obsidian typings this repo builds against, and minAppVersion is
-			// 1.7.2. Revisit when both move.
-			'obsidianmd/settings-tab/prefer-setting-definitions': 'off',
 		},
 	},
 	{
