@@ -7,7 +7,7 @@
 // page-collections.html, categories.html and rating.html.
 
 import type { CachedMetadata } from 'obsidian';
-import type { TxtFacetsSettings } from './settings';
+import type { TxtFacetsSettings } from './settings.ts';
 
 export interface PageItem {
 	path: string;
