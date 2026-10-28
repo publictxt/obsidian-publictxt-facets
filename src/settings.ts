@@ -1,5 +1,5 @@
 // Settings types and defaults (docs/spec.md → Settings). No Obsidian runtime
-// imports, so derive.ts and the tests can use them under plain Node.
+// imports, so src/page/ and the tests can use them under plain Node.
 
 export type TagsFrom = 'both' | 'frontmatter' | 'inline';
 export type OpenIn = 'current' | 'tab' | 'split';
