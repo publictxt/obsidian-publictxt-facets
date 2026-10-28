@@ -1,125 +1,97 @@
-// The settings tab (docs/spec.md → Settings). Settings that change which
-// notes are pages, or what a page record holds, rebuild the index.
+// The settings tab (docs/spec.md → Settings), declared rather than drawn, so
+// Obsidian renders it and its settings show up in settings search. Settings
+// that change which notes are pages, or what a page record holds, rebuild
+// the index.
 
-import { debounce, PluginSettingTab, Setting, type App } from 'obsidian';
+import { debounce, PluginSettingTab, type App, type SettingDefinitionItem } from 'obsidian';
 import type PublicTxtFacetsPlugin from './main.ts';
-import type { OpenIn, TagsFrom } from './settings.ts';
+import { normalizeSettings, type PublicTxtFacetsSettings } from './settings.ts';
+
+type Key = keyof PublicTxtFacetsSettings;
 
 /** A pause in typing before a text setting rebuilds the index. */
 const TYPING_MS = 600;
 
-const TAGS_FROM_LABELS: Record<TagsFrom, string> = {
-	both: 'Front matter and inline',
-	frontmatter: 'Front matter only',
-	inline: 'Inline only',
-};
-
-const OPEN_IN_LABELS: Record<OpenIn, string> = {
-	current: 'Current tab',
-	tab: 'New tab',
-	split: 'Split',
-};
-
-/** One entry per line; blank lines dropped. */
-const lines = (value: string) =>
-	value
-		.split(/\r?\n/)
-		.map((s) => s.trim())
-		.filter(Boolean);
+/** Rebuild at once: a toggle or a dropdown. */
+const REBUILD_NOW: readonly Key[] = ['collectionFromFolder', 'tagsFrom'];
+/** Rebuild once typing pauses: the text areas. */
+const REBUILD_SOON: readonly Key[] = ['excludedFolders', 'categories'];
 
 export class PublicTxtFacetsSettingTab extends PluginSettingTab {
 	plugin: PublicTxtFacetsPlugin;
+	private rebuildSoon: () => void;
 
 	constructor(app: App, plugin: PublicTxtFacetsPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
+		this.rebuildSoon = debounce(() => void plugin.buildIndex(), TYPING_MS, true);
 	}
 
-	display(): void {
-		const { containerEl, plugin } = this;
-		const { settings } = plugin;
-		containerEl.empty();
+	getSettingDefinitions(): SettingDefinitionItem[] {
+		return [
+			{
+				name: 'Excluded folders',
+				desc: 'One folder per line. Notes inside them are not pages.',
+				control: { type: 'textarea', key: 'excludedFolders', rows: 4 },
+			},
+			{
+				name: 'Top-level folder as a collection',
+				desc: 'A page belongs to the collection named after its top-level folder (page at the root).',
+				control: { type: 'toggle', key: 'collectionFromFolder' },
+			},
+			{
+				name: 'Tags from',
+				desc: 'Front matter tags, inline #tags, or both.',
+				control: {
+					type: 'dropdown',
+					key: 'tagsFrom',
+					options: {
+						both: 'Front matter and inline',
+						frontmatter: 'Front matter only',
+						inline: 'Inline only',
+					},
+				},
+			},
+			{
+				name: 'Categories',
+				desc: 'One per line, or separated by commas. Only these count, in this spelling. Empty: any value counts.',
+				control: { type: 'textarea', key: 'categories', rows: 4 },
+			},
+			{
+				name: 'Open notes in',
+				desc: "Where a card's title opens the note. With the modifier key held, it opens a new tab.",
+				control: {
+					type: 'dropdown',
+					key: 'openIn',
+					options: { current: 'Current tab', tab: 'New tab', split: 'Split' },
+				},
+			},
+			{
+				name: 'Cards per batch',
+				desc: 'Cards shown at first, and added each time you show more.',
+				control: {
+					type: 'number',
+					key: 'cardsPerBatch',
+					min: 1,
+					step: 1,
+					validate: (n) => (Number.isInteger(n) && n >= 1 ? undefined : 'A whole number, 1 or more.'),
+				},
+			},
+		];
+	}
 
-		// Text areas rebuild once typing pauses, not on every keystroke.
-		const rebuildSoon = debounce(() => void plugin.buildIndex(), TYPING_MS, true);
-		const save = async (rebuild: 'now' | 'soon' | 'no') => {
-			await plugin.saveSettings();
-			if (rebuild === 'now') void plugin.buildIndex();
-			if (rebuild === 'soon') rebuildSoon();
-		};
+	/** The lists show as text, one entry per line. */
+	getControlValue(key: string): unknown {
+		const v = this.plugin.settings[key as Key];
+		return Array.isArray(v) ? v.join('\n') : v;
+	}
 
-		new Setting(containerEl)
-			.setName('Excluded folders')
-			.setDesc('One folder per line. Notes inside them are not pages.')
-			.addTextArea((text) => {
-				text.inputEl.rows = 4;
-				text.setValue(settings.excludedFolders.join('\n')).onChange(async (value) => {
-					settings.excludedFolders = lines(value);
-					await save('soon');
-				});
-			});
-
-		new Setting(containerEl)
-			.setName('Top-level folder as a collection')
-			.setDesc('A page belongs to the collection named after its top-level folder (page at the root).')
-			.addToggle((toggle) =>
-				toggle.setValue(settings.collectionFromFolder).onChange(async (value) => {
-					settings.collectionFromFolder = value;
-					await save('now');
-				}),
-			);
-
-		new Setting(containerEl)
-			.setName('Tags from')
-			.setDesc('Front matter tags, inline #tags, or both.')
-			.addDropdown((dropdown) => {
-				for (const [value, label] of Object.entries(TAGS_FROM_LABELS)) {
-					dropdown.addOption(value, label);
-				}
-				dropdown.setValue(settings.tagsFrom).onChange(async (value) => {
-					settings.tagsFrom = value as TagsFrom;
-					await save('now');
-				});
-			});
-
-		new Setting(containerEl)
-			.setName('Categories')
-			.setDesc(
-				'One per line, or separated by commas. Only these count, in this spelling. Empty: any value counts.',
-			)
-			.addTextArea((text) => {
-				text.inputEl.rows = 4;
-				text.setValue(settings.categories.join('\n')).onChange(async (value) => {
-					settings.categories = lines(value.replace(/,/g, '\n'));
-					await save('soon');
-				});
-			});
-
-		new Setting(containerEl)
-			.setName('Open notes in')
-			.setDesc("Where a card's title opens the note. With the modifier key held, it opens a new tab.")
-			.addDropdown((dropdown) => {
-				for (const [value, label] of Object.entries(OPEN_IN_LABELS)) {
-					dropdown.addOption(value, label);
-				}
-				dropdown.setValue(settings.openIn).onChange(async (value) => {
-					settings.openIn = value as OpenIn;
-					await save('no');
-				});
-			});
-
-		new Setting(containerEl)
-			.setName('Cards per batch')
-			.setDesc('Cards shown at first, and added each time you show more.')
-			.addText((text) => {
-				text.inputEl.type = 'number';
-				text.inputEl.min = '1';
-				text.setValue(String(settings.cardsPerBatch)).onChange(async (value) => {
-					const n = Number.parseInt(value, 10);
-					if (!Number.isInteger(n) || n < 1) return;
-					settings.cardsPerBatch = n;
-					await save('no');
-				});
-			});
+	/** Every change goes through normalizeSettings, as data.json does. */
+	async setControlValue(key: string, value: unknown): Promise<void> {
+		const { plugin } = this;
+		plugin.settings = normalizeSettings({ ...plugin.settings, [key]: value });
+		await plugin.saveSettings();
+		if (REBUILD_NOW.includes(key as Key)) void plugin.buildIndex();
+		if (REBUILD_SOON.includes(key as Key)) this.rebuildSoon();
 	}
 }

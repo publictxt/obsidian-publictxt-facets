@@ -116,6 +116,8 @@ to Newest.
 | Open notes in | current tab |
 | Cards per batch | 20 |
 
+The tab is declared (`getSettingDefinitions`, Obsidian 1.13+), so its settings appear in
+Obsidian's settings search. Every change goes through `normalizeSettings`, as `data.json` does.
 Excluded folders, folder as a collection, tags from and the categories list rebuild the index
 (the text areas once typing pauses). Excluded folders are one per line; categories one per line
 or comma-separated.
