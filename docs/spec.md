@@ -94,9 +94,16 @@ to Newest.
 | id | Name |
 |---|---|
 | `open` | Open |
-| `filter-tag-under-cursor` | Filter by tag under cursor |
+| `filter-tag-under-cursor` | Filter by this tag (the tag under the cursor) |
 | `like-this` | Show pages like this one (its collections and tags, included) |
 | `clear` | Clear |
+
+- **Filter by this tag**: the tag under the cursor, an inline `#tag` or an entry of front matter
+  `tags:`. Offered only when the cursor is on one.
+- **Show pages like this one**: offered only when the active note is a page. Its tags match
+  `all`, as the tag facet does by default.
+- Both open or focus the view and **replace** its browse state, keeping the sort.
+- **Clear** is offered while the view is open.
 
 ## Settings
 
@@ -109,6 +116,10 @@ to Newest.
 | Open notes in | current tab |
 | Cards per batch | 20 |
 
+Excluded folders, folder as a collection, tags from and the categories list rebuild the index
+(the text areas once typing pauses). Excluded folders are one per line; categories one per line
+or comma-separated.
+
 ## Build order
 
 Each slice is usable in the test vault (`test-vaults/txt-cpy`) before the next starts.
@@ -118,4 +129,4 @@ Each slice is usable in the test vault (`test-vaults/txt-cpy`) before the next s
 3. ✓ Cards and compact mode.
 4. ✓ Chip facets: include/exclude, all/any, counts. Title filter.
 5. ✓ Rating and the sort menu.
-6. Live updates, saved state, settings tab, commands.
+6. ✓ Live updates, saved state, settings tab, commands.

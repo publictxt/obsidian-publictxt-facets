@@ -276,3 +276,34 @@ describe('saved state', () => {
 		assert.equal(v.root.querySelectorAll(v.chip('tag', 'gone')).length, 0);
 	});
 });
+
+describe('commands', () => {
+	test('filterBy replaces the filters, keeps the sort and saves', async () => {
+		const v = await openView();
+		v.click(v.chip('collection', 'blog'));
+		v.click('[data-rating="5"]');
+		const sort = v.$('.publictxt-facets-sort') as HTMLSelectElement;
+		sort.value = 'title';
+		sort.dispatchEvent(new win.Event('change', { bubbles: true }) as unknown as Event);
+		const saves = v.saves.count;
+		v.view.filterBy({ collection: ['wiki'], tag: ['even', 'three'] });
+		assert.equal(v.status(), '3 pages — wiki · #even · #three');
+		assert.equal(sort.value, 'title');
+		assert.deepEqual(v.titles(), ['Page 00', 'Page 06', 'Page 12']);
+		assert.equal(v.saves.count, saves + 1);
+	});
+
+	test('filterBy before the index is built is applied once it is', async () => {
+		const v = await openView({ indexReady: false });
+		v.view.filterBy({ tag: ['odd'] });
+		v.indexChanged();
+		assert.equal(v.status(), '12 pages — #odd');
+	});
+
+	test('Clear from the command palette clears as the button does', async () => {
+		const v = await openView();
+		v.click(v.chip('tag', 'odd'));
+		v.view.clear();
+		assert.equal(v.status(), '25 pages');
+	});
+});

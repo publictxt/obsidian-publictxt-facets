@@ -5,8 +5,8 @@ with live counts, a sort menu and page cards. It shares the concepts of
 [PublicTxt-Pages](https://github.com/publictxt/publictxt-pages)' browse lists and search, and
 works in any vault.
 
-Early development: facets, counts, the title filter and cards work; rating, sort, saved
-state and settings are still to come. Design notes are in `docs/`: `intent.md` (why),
+Early development, not yet released: facets, counts, rating, sort, the title filter, cards,
+saved state, live updates, settings and commands all work. Design notes are in `docs/`: `intent.md` (why),
 `spec.md` (what), and `naming.md` (names and vocabulary).
 
 ## Development

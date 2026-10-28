@@ -1,6 +1,8 @@
 import { Events, Plugin, TFolder, WorkspaceLeaf, type TAbstractFile } from 'obsidian';
+import { registerCommands } from './commands.ts';
 import { pageFor, readAllPages } from './indexer.ts';
 import { INDEX_CHANGED, PageIndex } from './page-index.ts';
+import { PublicTxtFacetsSettingTab } from './settings-tab.ts';
 import { normalizeSettings, type PublicTxtFacetsSettings } from './settings.ts';
 import { FacetsView, VIEW_TYPE } from './ui/view.ts';
 
@@ -37,15 +39,12 @@ export default class PublicTxtFacetsPlugin extends Plugin {
 			display: 'PublicTxt Facets',
 			defaultMod: true,
 		});
+		this.addSettingTab(new PublicTxtFacetsSettingTab(this.app, this));
 
 		this.addRibbonIcon('list-filter', 'Open facets', () => {
 			void this.openView();
 		});
-		this.addCommand({
-			id: 'open',
-			name: 'Open',
-			callback: () => void this.openView(),
-		});
+		registerCommands(this);
 
 		this.register(() => {
 			for (const timer of this.pending.values()) window.clearTimeout(timer);
@@ -65,6 +64,10 @@ export default class PublicTxtFacetsPlugin extends Plugin {
 				this.app.vault.on('rename', (file, oldPath) => this.onRenamed(file, oldPath)),
 			);
 		});
+	}
+
+	async saveSettings(): Promise<void> {
+		await this.saveData(this.settings);
 	}
 
 	/**
@@ -159,8 +162,12 @@ export default class PublicTxtFacetsPlugin extends Plugin {
 		}, TOTALS_MS);
 	}
 
-	// One view, reused: focus an open one, else open it in a new tab.
-	async openView(): Promise<void> {
+	/**
+	 * One view, reused: focus an open one, else open it in a new tab. Revealing
+	 * loads a view restored from the layout but not shown yet (a deferred
+	 * view), so the view is there to return.
+	 */
+	async openView(): Promise<FacetsView | null> {
 		const { workspace } = this.app;
 		let leaf: WorkspaceLeaf | null =
 			workspace.getLeavesOfType(VIEW_TYPE)[0] ?? null;
@@ -169,5 +176,6 @@ export default class PublicTxtFacetsPlugin extends Plugin {
 			await leaf.setViewState({ type: VIEW_TYPE, active: true });
 		}
 		await workspace.revealLeaf(leaf);
+		return leaf.view instanceof FacetsView ? leaf.view : null;
 	}
 }
