@@ -3,7 +3,7 @@
 // the notes the tests use.
 
 import type { CachedMetadata, FrontMatterCache, HeadingCache, TagCache } from 'obsidian';
-import type { FileInfo } from '../../src/derive.ts';
+import type { FileInfo } from '../../src/page/derive.ts';
 
 function unquote(s: string): string {
 	const t = s.trim();

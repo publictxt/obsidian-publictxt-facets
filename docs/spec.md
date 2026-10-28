@@ -97,9 +97,9 @@ Each chip facet holds a `FilterState`: `{ inc, exc, match }`.
 
 Each slice is usable in the test vault (`test-vaults/txt-cpy`) before the next starts.
 
-1. Scaffold: names applied, an empty view opens, a deploy script.
-2. Page records (`derive.ts`, with tests), plus a plain list sorted by Newest.
-3. Cards and compact mode.
+1. ✓ Scaffold: names applied, an empty view opens, a deploy script.
+2. ✓ Page records (`src/page/`, with tests), plus a plain list sorted by Newest.
+3. ✓ Cards and compact mode.
 4. Chip facets: include/exclude, all/any, counts. Title filter.
 5. Rating and the sort menu.
 6. Live updates, saved state, settings tab, commands.

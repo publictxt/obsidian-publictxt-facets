@@ -1,7 +1,7 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { bookmarkLabel, dateLabels, formatDate, stars } from '../src/cards.ts';
-import { dateOnlyToISO } from '../src/derive.ts';
+import { dateOnlyToISO } from '../src/page/dates.ts';
 
 describe('card text', () => {
 	test('dates read "2 Jan 2006"', () => {

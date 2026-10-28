@@ -1,7 +1,8 @@
 import { ItemView, Keymap, WorkspaceLeaf } from 'obsidian';
 import { card } from './cards.ts';
-import type { PageItem } from './derive.ts';
+import type { PageItem } from './page/derive.ts';
 import type TxtFacetsPlugin from './main.ts';
+import { INDEX_CHANGED } from './page-index.ts';
 
 export const VIEW_TYPE = 'txt-facets';
 
@@ -37,7 +38,7 @@ export class FacetsView extends ItemView {
 	async onOpen(): Promise<void> {
 		this.contentEl.addClass('txt-facets');
 		this.registerEvent(
-			this.plugin.events.on('index-changed', () => this.render()),
+			this.plugin.events.on(INDEX_CHANGED, () => this.render()),
 		);
 		// One click and one hover listener serve every card.
 		this.registerDomEvent(this.contentEl, 'click', (evt) => this.onClick(evt));
