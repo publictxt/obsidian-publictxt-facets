@@ -2,7 +2,7 @@ import { Events, Plugin, WorkspaceLeaf } from 'obsidian';
 import { readAllPages } from './indexer.ts';
 import { INDEX_CHANGED, PageIndex } from './page-index.ts';
 import { normalizeSettings, type TxtFacetsSettings } from './settings.ts';
-import { FacetsView, VIEW_TYPE } from './view.ts';
+import { FacetsView, VIEW_TYPE } from './ui/view.ts';
 
 export default class TxtFacetsPlugin extends Plugin {
 	settings!: TxtFacetsSettings;

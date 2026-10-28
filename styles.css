@@ -10,12 +10,18 @@
 	color: var(--text-muted);
 }
 
+/* Bar: title filter, Compact, Clear */
+
 .txt-facets .txt-facets-bar {
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
 	gap: var(--size-4-2);
 	margin-bottom: var(--size-4-3);
+}
+
+.txt-facets .txt-facets-title-filter {
+	flex: 1 1 auto;
+	min-width: 0;
 }
 
 .txt-facets .txt-facets-compact[aria-pressed='true'] {
@@ -23,8 +29,79 @@
 	color: var(--text-on-accent);
 }
 
+/* Layout: results, then the filter column; stacked, filters first, when
+   the view is narrow (.is-narrow, set by the view's ResizeObserver). */
+
+.txt-facets .txt-facets-layout {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 240px;
+	gap: var(--size-4-4);
+	align-items: start;
+}
+
+.txt-facets.is-narrow .txt-facets-layout {
+	grid-template-columns: minmax(0, 1fr);
+}
+
+.txt-facets.is-narrow .txt-facets-filters {
+	order: -1;
+}
+
+.txt-facets .txt-facets-status {
+	margin: 0 0 var(--size-4-3);
+	color: var(--text-muted);
+}
+
 .txt-facets .txt-facets-more {
 	margin-top: var(--size-4-3);
+}
+
+/* Filter column */
+
+.txt-facets .txt-facets-filters {
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-4-4);
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-m);
+	padding: 0.8rem 0.9rem;
+}
+
+.txt-facets .txt-facets-filters:empty {
+	display: none;
+}
+
+.txt-facets .filter-group-head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: var(--size-4-2);
+	margin-bottom: 0.45rem;
+}
+
+.txt-facets .filter-group-label {
+	font-size: 0.72rem;
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--text-muted);
+}
+
+.txt-facets .match-toggle {
+	height: auto;
+	box-shadow: none;
+	font-size: 0.7rem;
+	padding: 0.05rem 0.5rem;
+	background: none;
+	border: 1px dashed var(--background-modifier-border);
+	border-radius: 999px;
+	color: var(--text-muted);
+	cursor: pointer;
+}
+
+.txt-facets .match-toggle:hover {
+	border-color: var(--interactive-accent);
 }
 
 /* Chips */
@@ -40,6 +117,88 @@
 	padding: 0.05rem 0.6rem;
 	text-decoration: none;
 	white-space: nowrap;
+}
+
+/* Chips that are buttons: drop Obsidian's default button look. */
+.txt-facets button.chip,
+.txt-facets .filter-chip > button {
+	height: auto;
+	box-shadow: none;
+	font: inherit;
+	font-size: 0.78rem;
+	cursor: pointer;
+}
+
+.txt-facets .chip:hover {
+	border-color: var(--interactive-accent);
+	color: var(--text-accent);
+}
+
+.txt-facets .chip .count {
+	color: var(--text-muted);
+	font-size: 0.7rem;
+	margin-left: 0.35rem;
+}
+
+.txt-facets .chip.active {
+	background: color-mix(in srgb, var(--interactive-accent) 18%, transparent);
+	border-color: var(--interactive-accent);
+	color: var(--text-accent);
+}
+
+/* A filter chip: a pill around a body button and a ✕ button. */
+.txt-facets span.filter-chip {
+	display: inline-flex;
+	align-items: baseline;
+}
+
+.txt-facets .filter-chip > button {
+	color: inherit;
+	background: none;
+	border: 0;
+	padding: 0;
+}
+
+.txt-facets .filter-chip.empty:not(.active) {
+	opacity: 0.45;
+}
+
+.txt-facets .filter-chip.more {
+	border-style: dashed;
+	color: var(--text-muted);
+}
+
+.txt-facets .filter-chip > .chip-x {
+	margin-left: 0.3rem;
+	font-size: 0.55rem;
+	color: var(--text-muted);
+}
+
+.txt-facets .filter-chip > .chip-x:hover,
+.txt-facets .filter-chip.excluded > .chip-x {
+	color: var(--text-accent);
+}
+
+/* ✕ on set chips; on off chips it keeps its space (no reflow) and shows on
+   hover or keyboard focus. Touch has no hover, so there it's gone. */
+.txt-facets .filter-chip:not(.active):not(.excluded):not(:hover) > .chip-x:not(:focus-visible) {
+	opacity: 0;
+}
+
+@media (hover: none) {
+	.txt-facets .filter-chip:not(.active):not(.excluded) > .chip-x {
+		display: none;
+	}
+}
+
+.txt-facets .filter-chip.excluded,
+.txt-facets .filter-chip.excluded:hover {
+	border-style: dashed;
+	color: var(--text-muted);
+}
+
+.txt-facets .filter-chip.excluded > .chip-body {
+	text-decoration: line-through;
 }
 
 .txt-facets .chip-collection {

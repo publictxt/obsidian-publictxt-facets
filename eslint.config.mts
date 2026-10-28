@@ -41,11 +41,12 @@ export default defineConfig(
 	},
 	{
 		// Tests run under Node, not in Obsidian; node:test's describe/test
-		// promises are handled by the runner.
+		// promises are handled by the runner, and their strings aren't UI.
 		files: ['tests/**/*.ts'],
 		rules: {
 			'obsidianmd/no-nodejs-modules': 'off',
 			'@typescript-eslint/no-floating-promises': 'off',
+			'obsidianmd/ui/sentence-case': 'off',
 		},
 	},
 );
