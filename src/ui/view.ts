@@ -1,8 +1,8 @@
 import { ItemView, Keymap, WorkspaceLeaf } from 'obsidian';
 import { card } from './cards.ts';
-import type { PageItem } from './page/derive.ts';
-import type TxtFacetsPlugin from './main.ts';
-import { INDEX_CHANGED } from './page-index.ts';
+import type { PageItem } from '../page/derive.ts';
+import type TxtFacetsPlugin from '../main.ts';
+import { INDEX_CHANGED } from '../page-index.ts';
 
 export const VIEW_TYPE = 'txt-facets';
 

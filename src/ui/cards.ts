@@ -3,7 +3,7 @@
 // from the vault is ever parsed as markup. Tag chips are plain labels until
 // the facets slice makes them filters.
 
-import type { PageItem } from './page/derive.ts';
+import type { PageItem } from '../page/derive.ts';
 
 /** Tag chips shown per card, as on the site. */
 export const CARD_TAGS = 6;
