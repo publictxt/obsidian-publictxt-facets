@@ -24,6 +24,10 @@
 	min-width: 0;
 }
 
+.publictxt-facets .publictxt-facets-sort {
+	flex: 0 0 auto;
+}
+
 .publictxt-facets .publictxt-facets-compact[aria-pressed='true'] {
 	background: var(--interactive-accent);
 	color: var(--text-on-accent);

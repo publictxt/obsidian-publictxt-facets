@@ -8,15 +8,18 @@ import {
 	FACETS,
 	filterPages,
 	press,
+	ratingChoices,
+	ratingCounts,
 	sortedKeys,
 	toggleInclude,
 	type FacetKey,
+	type RatingFilter,
 } from '../filter.ts';
 import type PublicTxtFacetsPlugin from '../main.ts';
 import { INDEX_CHANGED } from '../page-index.ts';
 import { renderFilters } from './filters.ts';
+import { SORTS } from '../sort.ts';
 import { Results } from './results.ts';
-import { DEFAULT_SORT } from '../sort.ts';
 
 export const VIEW_TYPE = 'publictxt-facets';
 
@@ -26,7 +29,7 @@ const TYPING_MS = 200;
 
 // The facets view: owns the browse state, lays out the bar, results and
 // filter column, and handles every click through data-* attributes.
-// Saved state, rating and sort arrive in later slices (docs/spec.md).
+// Saved state arrives in a later slice (docs/spec.md).
 export class FacetsView extends ItemView {
 	private plugin: PublicTxtFacetsPlugin;
 	private state = emptyBrowseState();
@@ -36,8 +39,11 @@ export class FacetsView extends ItemView {
 	private expanded = new Set<FacetKey>();
 	/** Chip order per facet, from totals across all pages. */
 	private order = {} as Record<FacetKey, string[]>;
+	/** Rating chips to offer, from the ratings any page has. */
+	private ratings: RatingFilter[] = [];
 
 	private titleEl!: HTMLInputElement;
+	private sortEl!: HTMLSelectElement;
 	/** The title filter's pending run, cancelled when the view closes. */
 	private typed: Debouncer<[], void> | null = null;
 	private filtersEl!: HTMLElement;
@@ -101,6 +107,17 @@ export class FacetsView extends ItemView {
 		}, TYPING_MS, true));
 		this.titleEl.addEventListener('input', () => typed());
 
+		this.sortEl = bar.createEl('select', {
+			cls: 'dropdown publictxt-facets-sort',
+			attr: { 'aria-label': 'Sort' },
+		});
+		for (const [value, label] of SORTS) this.sortEl.createEl('option', { value, text: label });
+		this.sortEl.value = this.state.sort;
+		this.sortEl.addEventListener('change', () => {
+			this.state.sort = this.sortEl.value;
+			this.run();
+		});
+
 		const compact = bar.createEl('button', { text: 'Compact', cls: 'publictxt-facets-compact' });
 		compact.setAttribute('aria-pressed', 'false');
 		compact.addEventListener('click', () => {
@@ -125,23 +142,32 @@ export class FacetsView extends ItemView {
 	clear(): void {
 		clearBrowseState(this.state);
 		this.titleEl.value = '';
+		this.sortEl.value = this.state.sort;
 		this.run();
 		this.titleEl.focus();
 	}
 
 	private onIndexChanged(): void {
-		const totals = countValues(this.plugin.index.all());
+		const all = this.plugin.index.all();
+		const totals = countValues(all);
 		for (const d of FACETS) this.order[d.key] = sortedKeys(totals[d.key]);
+		this.ratings = ratingChoices(all);
 		this.run();
 	}
 
 	/** Filter, count and draw: after every change to the state or the index. */
 	private run(): void {
 		if (!this.plugin.indexReady) return;
-		const pages = this.plugin.index.sorted(DEFAULT_SORT);
+		const pages = this.plugin.index.sorted(this.state.sort);
 		const shown = filterPages(pages, this.state);
-		const counts = chipCounts(pages, this.state, shown);
-		renderFilters(this.filtersEl, this.state, this.order, counts, this.expanded);
+		renderFilters(this.filtersEl, {
+			state: this.state,
+			order: this.order,
+			counts: chipCounts(pages, this.state, shown),
+			expanded: this.expanded,
+			ratings: this.ratings,
+			ratingCounts: ratingCounts(filterPages(pages, this.state, 'rating')),
+		});
 		const n = shown.length;
 		const parts = describe(this.state);
 		this.results.setStatus(
@@ -152,10 +178,10 @@ export class FacetsView extends ItemView {
 
 	private onClick(evt: MouseEvent): void {
 		const el = (evt.target as HTMLElement).closest<HTMLElement>(
-			'[data-path], [data-tag], [data-facet], [data-match], [data-more]',
+			'[data-path], [data-tag], [data-facet], [data-match], [data-more], [data-rating]',
 		);
 		if (!el) return;
-		const { path, tag, facet, value, match, more } = el.dataset;
+		const { path, tag, facet, value, match, more, rating } = el.dataset;
 		if (path !== undefined) {
 			evt.preventDefault();
 			return this.openNote(path, Keymap.isModEvent(evt) || this.defaultPane());
@@ -169,6 +195,8 @@ export class FacetsView extends ItemView {
 		} else if (more) {
 			const key = more as FacetKey;
 			if (!this.expanded.delete(key)) this.expanded.add(key);
+		} else if (rating !== undefined) {
+			this.state.rating = this.state.rating === rating ? '' : (rating as RatingFilter);
 		}
 		this.run();
 	}
