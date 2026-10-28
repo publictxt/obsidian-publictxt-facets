@@ -1,4 +1,4 @@
-# PublicTxt Facets
+# Obsidian PublicTxt Facets
 
 An Obsidian plugin for browsing a vault by facets: collection, category, tag and rating chips
 with live counts, a sort menu and page cards. It shares the concepts of
