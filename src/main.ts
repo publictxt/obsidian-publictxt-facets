@@ -1,14 +1,20 @@
-import { Plugin, WorkspaceLeaf } from 'obsidian';
-import { normalizeSettings, TxtFacetsSettings } from './settings.ts';
+import { Events, Plugin, WorkspaceLeaf } from 'obsidian';
+import { readAllPages } from './indexer.ts';
+import { PageIndex } from './page-index.ts';
+import { normalizeSettings, type TxtFacetsSettings } from './settings.ts';
 import { FacetsView, VIEW_TYPE } from './view.ts';
 
 export default class TxtFacetsPlugin extends Plugin {
 	settings!: TxtFacetsSettings;
+	index = new PageIndex();
+	indexReady = false;
+	/** Triggers 'index-changed' whenever the index's contents change. */
+	events = new Events();
 
 	async onload() {
 		this.settings = normalizeSettings(await this.loadData());
 
-		this.registerView(VIEW_TYPE, (leaf) => new FacetsView(leaf));
+		this.registerView(VIEW_TYPE, (leaf) => new FacetsView(leaf, this));
 
 		this.addRibbonIcon('list-filter', 'Open facets', () => {
 			void this.openView();
@@ -18,6 +24,16 @@ export default class TxtFacetsPlugin extends Plugin {
 			name: 'Open',
 			callback: () => void this.openView(),
 		});
+
+		// After layout, so the vault's files and metadata cache are loaded
+		// and startup isn't held up.
+		this.app.workspace.onLayoutReady(() => void this.buildIndex());
+	}
+
+	async buildIndex(): Promise<void> {
+		this.index.replaceAll(await readAllPages(this.app, this.settings));
+		this.indexReady = true;
+		this.events.trigger('index-changed');
 	}
 
 	// One view, reused: focus an open one, else open it in a new tab.
