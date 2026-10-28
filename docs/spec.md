@@ -86,7 +86,7 @@ Each chip facet holds a `FilterState`: `{ inc, exc, match }`.
 
 | Setting | Default |
 |---|---|
-| Excluded folders | `.obsidian`, `.trash`, `.git`, `media` |
+| Excluded folders | none (Obsidian never indexes dot-folders) |
 | Top-level folder as a collection | on |
 | Tags from | front matter and inline |
 | Categories list | empty (any value) |
