@@ -1,8 +1,8 @@
 // A stand-in for Obsidian's MetadataCache: front matter (a YAML subset), ATX
-// headings and inline #tags, close enough to what getFileCache() returns for
-// the notes the tests use.
+// headings and inline #tags with their positions, close enough to what
+// getFileCache() returns for the notes the tests use.
 
-import type { CachedMetadata, FrontMatterCache, HeadingCache, TagCache } from 'obsidian';
+import type { CachedMetadata, FrontMatterCache, HeadingCache, Pos, TagCache } from 'obsidian';
 import type { FileInfo } from '../../src/page/derive.ts';
 
 function unquote(s: string): string {
@@ -43,10 +43,15 @@ export function parseFrontMatter(block: string): FrontMatterCache {
 	return fm;
 }
 
-const NO_POS = {
-	start: { line: 0, col: 0, offset: 0 },
-	end: { line: 0, col: 0, offset: 0 },
-};
+/** The position of `text.slice(start, end)`. */
+function pos(text: string, start: number, end: number): Pos {
+	const loc = (offset: number) => {
+		const before = text.slice(0, offset);
+		const line = (before.match(/\n/g) ?? []).length;
+		return { line, col: offset - (before.lastIndexOf('\n') + 1), offset };
+	};
+	return { start: loc(start), end: loc(end) };
+}
 
 // Obsidian's tag rule: `#`, then letters, digits, `_`, `-`, `/`, at least one
 // of them not a digit.
@@ -54,26 +59,35 @@ const TAG_RE = /(?<![\w#/&])#((?=[\p{L}\p{N}_\-/]*[\p{L}_\-/])[\p{L}\p{N}_\-/]+)
 
 export function fakeCache(text: string): CachedMetadata {
 	const cache: CachedMetadata = {};
-	let body = text.replace(/\r\n?/g, '\n');
-	const fm = /^---[ \t]*\n(?:([\s\S]*?)\n)?---[ \t]*(?:\n|$)/.exec(body);
+	const t = text.replace(/\r\n?/g, '\n');
+	let offset = 0;
+	const fm = /^---[ \t]*\n(?:([\s\S]*?)\n)?---[ \t]*(?:\n|$)/.exec(t);
 	if (fm) {
 		cache.frontmatter = parseFrontMatter(fm[1] ?? '');
-		body = body.slice(fm[0].length);
+		cache.frontmatterPosition = pos(t, 0, fm[0].trimEnd().length);
+		offset = fm[0].length;
 	}
 	const headings: HeadingCache[] = [];
 	const tags: TagCache[] = [];
 	let inFence = false;
-	for (const line of body.split('\n')) {
+	for (const line of t.slice(offset).split('\n')) {
+		const start = offset;
+		offset += line.length + 1;
 		if (/^\s*(```|~~~)/.test(line)) inFence = !inFence;
 		if (inFence || /^\s*(```|~~~)/.test(line)) continue;
 		const h = /^ {0,3}(#{1,6})[ \t]+(.*?)\s*$/.exec(line);
 		if (h) {
-			headings.push({ heading: h[2]!, level: h[1]!.length, position: NO_POS });
+			headings.push({
+				heading: h[2]!,
+				level: h[1]!.length,
+				position: pos(t, start, start + line.length),
+			});
 			continue;
 		}
 		const noCode = line.replace(/`[^`]*`/g, (m) => ' '.repeat(m.length));
 		for (const m of noCode.matchAll(TAG_RE)) {
-			tags.push({ tag: '#' + m[1]!, position: NO_POS });
+			const s = start + m.index;
+			tags.push({ tag: '#' + m[1]!, position: pos(t, s, s + m[0].length) });
 		}
 	}
 	if (headings.length) cache.headings = headings;
