@@ -20,8 +20,11 @@ The site's rules, which the page rules follow, are in the Pages repo: `docs/SPEC
 
 ```txt
 src/
-  main.ts         plugin lifecycle: settings, view, ribbon, commands, index build, live updates
+  main.ts         plugin lifecycle: settings, view, ribbon, index build, live updates
   settings.ts     settings types, defaults, normalizeSettings()
+  settings-tab.ts the settings tab; what rebuilds the index
+  commands.ts     the commands (ids in docs/naming.md)
+  cursor-tag.ts   the tag under the editor cursor. Pure
   page/           how a note becomes a page record. Pure: no Obsidian runtime imports
     derive.ts       which files are pages, each field's rule, derivePage()
     dates.ts        the created/updated ladder

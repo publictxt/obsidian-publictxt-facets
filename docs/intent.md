@@ -139,3 +139,6 @@ filtering with cards.
    substring matching first.
 2. **Does the title filter become the search box?** When text search arrives, the title filter's
    box is the natural place for it. Decide then whether title-only filtering stays as a mode.
+3. **"Show pages like this one": all or any tags?** It matches the page's tags `all`, as the tag
+   facet does, which for a page with many tags often finds little beyond the page itself. `any`
+   finds more. Possibly a setting later (decided 2026-10-29: `all` for now).
