@@ -8,7 +8,7 @@ vault.
 A **page** is any `.md` file except:
 
 - files under an excluded folder (setting)
-- housekeeping files: `README*`, `LICENSE*`, `CONTRIBUTING*`
+- housekeeping files, by exact name at any depth: `README.md`, `LICENSE.md`, `CONTRIBUTING.md`
 - files with `publish: off` / `false`, which the site hides
 
 `_index.md` files are pages.
@@ -19,7 +19,7 @@ A **page** is any `.md` file except:
 |---|---|
 | `title` | front matter `title`, else the first H1, else the file name |
 | `collections` | top-level folder (setting; `page` at root) ∪ front matter `collections` (value or list) ∪ `bookmarks` if there's a bookmark URL. Lower-case, deduped |
-| `categories` | front matter `category` / `categories` (value or list). Must be in the settings list, unless the list is empty |
+| `categories` | front matter `categories` / `category` (value or list), case-insensitive. With a settings list: only listed values, in the list's spelling. With an empty list: any value, lower-case |
 | `tags` | front matter `tags` and/or inline `#tags` (setting), via Obsidian's metadata cache. Lower-case, no `#`, deduped |
 | `rating` | front matter `rating`, integer 1–5; else unrated |
 | `created` | front matter `created` (or `date`), else `YYYYMMDD` / `YYYY-MM-DD` in the file name or a `/YYYY/MM/DD/` path, else file ctime |
@@ -86,7 +86,7 @@ Each chip facet holds a `FilterState`: `{ inc, exc, match }`.
 
 | Setting | Default |
 |---|---|
-| Excluded folders | `.obsidian`, `.trash`, `.git`, `media` |
+| Excluded folders | none (Obsidian never indexes dot-folders) |
 | Top-level folder as a collection | on |
 | Tags from | front matter and inline |
 | Categories list | empty (any value) |

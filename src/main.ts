@@ -1,8 +1,13 @@
 import { Plugin, WorkspaceLeaf } from 'obsidian';
+import { normalizeSettings, TxtFacetsSettings } from './settings';
 import { FacetsView, VIEW_TYPE } from './view';
 
 export default class TxtFacetsPlugin extends Plugin {
-	onload() {
+	settings!: TxtFacetsSettings;
+
+	async onload() {
+		this.settings = normalizeSettings(await this.loadData());
+
 		this.registerView(VIEW_TYPE, (leaf) => new FacetsView(leaf));
 
 		this.addRibbonIcon('list-filter', 'Open facets', () => {
