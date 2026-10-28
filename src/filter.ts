@@ -3,7 +3,8 @@
 // states, match modes and counting rules.
 
 import type { PageItem } from './page/derive.ts';
-import { DEFAULT_SORT, type Sort } from './sort.ts';
+import { normalizeTag } from './page/derive.ts';
+import { DEFAULT_SORT, normaliseSort, type Sort } from './sort.ts';
 
 export type FacetKey = 'collection' | 'category' | 'tag';
 export type Match = 'all' | 'any';
@@ -57,6 +58,58 @@ export function emptyBrowseState(): BrowseState {
 
 export function clearBrowseState(state: BrowseState): void {
 	Object.assign(state, emptyBrowseState());
+}
+
+/** A BrowseState as plain JSON, for the workspace layout: arrays for Sets. */
+export interface BrowseStateJSON {
+	title: string;
+	facets: Record<FacetKey, { inc: string[]; exc: string[]; match: Match }>;
+	rating: RatingFilter;
+	sort: Sort;
+}
+
+export function browseStateToJSON(state: BrowseState): BrowseStateJSON {
+	const facets = {} as BrowseStateJSON['facets'];
+	for (const d of FACETS) {
+		const f = state.facets[d.key];
+		facets[d.key] = { inc: [...f.inc], exc: [...f.exc], match: f.match };
+	}
+	return { title: state.title, facets, rating: state.rating, sort: state.sort };
+}
+
+const RATINGS: readonly RatingFilter[] = ['', '1', '2', '3', '4', '5', UNRATED];
+
+const obj = (v: unknown): Record<string, unknown> =>
+	typeof v === 'object' && v !== null ? (v as Record<string, unknown>) : {};
+
+/** A facet value in the spelling pages carry: tags without `#`, categories as listed. */
+function facetValue(key: FacetKey, v: unknown): string {
+	if (typeof v !== 'string') return '';
+	return key === 'tag' ? normalizeTag(v) : key === 'category' ? v.trim() : v.trim().toLowerCase();
+}
+
+/**
+ * A BrowseState from saved JSON, each part checked and replaced by its empty
+ * value when missing or malformed, so a hand-edited workspace.json can't
+ * break the view. A value both included and excluded stays excluded.
+ */
+export function browseStateFromJSON(raw: unknown): BrowseState {
+	const r = obj(raw);
+	const state = emptyBrowseState();
+	if (typeof r.title === 'string') state.title = r.title;
+	const facets = obj(r.facets);
+	for (const d of FACETS) {
+		const f = state.facets[d.key];
+		const saved = obj(facets[d.key]);
+		const values = (v: unknown) =>
+			(Array.isArray(v) ? v : []).map((x) => facetValue(d.key, x)).filter(Boolean);
+		for (const v of values(saved.exc)) f.exc.add(v);
+		for (const v of values(saved.inc)) if (!f.exc.has(v)) f.inc.add(v);
+		if (saved.match === 'all' || saved.match === 'any') f.match = saved.match;
+	}
+	if (RATINGS.includes(r.rating as RatingFilter)) state.rating = r.rating as RatingFilter;
+	if (typeof r.sort === 'string') state.sort = normaliseSort(r.sort);
+	return state;
 }
 
 export function chipState(f: FilterState, value: string): ChipState {

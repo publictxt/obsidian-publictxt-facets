@@ -78,8 +78,16 @@ to Newest.
   shows Page Preview.
 - **Card tag chips** include or clear that tag.
 - **Batches**: 20 cards, then **Show more**.
-- **Saved state**: `BrowseState` and the compact setting are saved with the workspace layout.
-- **Live updates**: note create, change, rename and delete update the results, debounced.
+- **Saved state**: `BrowseState` and the compact toggle are saved with the workspace layout,
+  as `{ browse, compact }`. The layout is saved when the user changes them, never on index
+  updates. A malformed saved state falls back part by part. A set value no page carries still
+  shows its chip (count 0), so it can be cleared.
+- **Live updates**: note create, change, rename and delete update the results. Each path waits
+  300 ms after its last event, then is re-read, or dropped when it's no longer a page (deleted,
+  moved into an excluded folder, `publish: off`). Folders go by prefix. The view re-runs once per
+  burst and keeps as many cards shown as before, and its scroll position.
+- **Rebuilds** read every page and swap the new index in whole; the old one stays on screen
+  meanwhile. A newer rebuild stops an older one.
 
 ## Commands
 

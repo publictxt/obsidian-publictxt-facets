@@ -26,13 +26,18 @@ export class Results {
 		this.statusEl.setText(text);
 	}
 
-	/** Replace the results; `activeTags` marks card tag chips as included. */
-	show(pages: PageItem[], activeTags: Set<string>): void {
+	/**
+	 * Replace the results; `activeTags` marks card tag chips as included.
+	 * With `keepShown`, as many cards as were showing are drawn again, so an
+	 * index update doesn't undo "Show more".
+	 */
+	show(pages: PageItem[], activeTags: Set<string>, keepShown = false): void {
+		const wanted = keepShown ? Math.max(this.shown, this.batchSize()) : this.batchSize();
 		this.pages = pages;
 		this.activeTags = activeTags;
 		this.shown = 0;
 		this.listEl.empty();
-		this.showMore();
+		this.append(wanted);
 	}
 
 	setCompact(on: boolean): void {
@@ -40,7 +45,11 @@ export class Results {
 	}
 
 	private showMore(): void {
-		const batch = this.pages.slice(this.shown, this.shown + this.batchSize());
+		this.append(this.batchSize());
+	}
+
+	private append(count: number): void {
+		const batch = this.pages.slice(this.shown, this.shown + count);
 		for (const page of batch) this.listEl.appendChild(card(page, this.activeTags));
 		this.shown += batch.length;
 		this.moreEl.toggle(this.shown < this.pages.length);

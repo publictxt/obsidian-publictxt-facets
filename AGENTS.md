@@ -20,7 +20,7 @@ The site's rules, which the page rules follow, are in the Pages repo: `docs/SPEC
 
 ```txt
 src/
-  main.ts         plugin lifecycle: settings, view, ribbon, commands, index build
+  main.ts         plugin lifecycle: settings, view, ribbon, commands, index build, live updates
   settings.ts     settings types, defaults, normalizeSettings()
   page/           how a note becomes a page record. Pure: no Obsidian runtime imports
     derive.ts       which files are pages, each field's rule, derivePage()
@@ -30,9 +30,10 @@ src/
   indexer.ts      reads the vault into page records (the Obsidian side of page/)
   page-index.ts   page records by path, sorted() with cached date keys
   sort.ts         the sort vocabulary (SORTS), normaliseSort/parseSort. Pure
-  filter.ts       BrowseState, facet table (FACETS), chip states, all/any, rating, counts. Pure
+  filter.ts       BrowseState (and its JSON), facet table (FACETS), chip states, all/any, rating,
+                  counts. Pure
   ui/             the view and its parts (Obsidian DOM)
-    view.ts         the view: BrowseState, layout, one delegated click handler
+    view.ts         the view: BrowseState, saved state, layout, one delegated click handler
     filters.ts      the filter column
     results.ts      status line, cards in batches, Show more
     cards.ts        the page card

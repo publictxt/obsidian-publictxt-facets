@@ -11,6 +11,8 @@ export interface SmokeView {
 	contentEl: HTMLElement;
 	navigation: boolean;
 	open(containerEl: HTMLElement): Promise<void>;
+	getState(): Record<string, unknown>;
+	setState(state: unknown, result: unknown): Promise<void>;
 }
 
 export type ViewClass = new (leaf: { app: unknown }, plugin: unknown) => SmokeView;

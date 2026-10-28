@@ -7,6 +7,7 @@ import {
 	chipState,
 	FACETS,
 	ratingLabel,
+	UNRATED,
 	type BrowseState,
 	type Counts,
 	type FacetDef,
@@ -14,6 +15,9 @@ import {
 	type FilterState,
 	type RatingFilter,
 } from '../filter.ts';
+
+/** Rating chips in the order they're offered. */
+const RATING_ORDER: readonly RatingFilter[] = ['5', '4', '3', '2', '1', UNRATED];
 
 /** Chips per facet before "+N more", as on the site's lists. */
 export const CHIP_LIMIT = 20;
@@ -36,9 +40,13 @@ export function renderFilters(el: HTMLElement, col: FilterColumn): void {
 	el.empty();
 	renderRating(el, col);
 	for (const d of FACETS) {
-		const names = order[d.key];
-		if (!names.length) continue; // no values at all, e.g. categories unused
 		const f = state.facets[d.key];
+		// A set value no page carries (gone since it was set, or set from a
+		// note that isn't a page) still gets a chip, so it can be cleared.
+		const known = new Set(order[d.key]);
+		const missing = [...f.inc, ...f.exc].filter((v) => !known.has(v));
+		const names = [...order[d.key], ...missing];
+		if (!names.length) continue; // no values at all, e.g. categories unused
 		const group = el.createDiv({ cls: 'filter-group' });
 
 		const head = group.createDiv({ cls: 'filter-group-head' });
@@ -70,14 +78,16 @@ export function renderFilters(el: HTMLElement, col: FilterColumn): void {
 
 // One rating chip at a time; pressing the set one clears it.
 function renderRating(el: HTMLElement, col: FilterColumn): void {
-	if (!col.ratings.length) return;
+	// The set rating shows even when no page has it, so it can be cleared.
+	const ratings = RATING_ORDER.filter((r) => col.ratings.includes(r) || r === col.state.rating);
+	if (!ratings.length) return;
 	const group = el.createDiv({ cls: 'filter-group' });
 	group.createDiv({ cls: 'filter-group-head' }).createSpan({
 		cls: 'filter-group-label',
 		text: 'Rating',
 	});
 	const row = group.createDiv({ cls: 'chip-row' });
-	for (const r of col.ratings) {
+	for (const r of ratings) {
 		const on = col.state.rating === r;
 		const count = col.ratingCounts.get(r) ?? 0;
 		const cls = ['chip', 'filter-chip'];
