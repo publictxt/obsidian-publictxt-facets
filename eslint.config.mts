@@ -42,11 +42,18 @@ export default defineConfig(
 	{
 		// Tests run under Node, not in Obsidian; node:test's describe/test
 		// promises are handled by the runner, and their strings aren't UI.
+		// The view smoke test's helpers stand in for Obsidian itself
+		// (globals, element helpers, DOM creation, loading the bundled view),
+		// so the plugin-code rules about those don't apply.
 		files: ['tests/**/*.ts'],
 		rules: {
 			'obsidianmd/no-nodejs-modules': 'off',
 			'@typescript-eslint/no-floating-promises': 'off',
 			'obsidianmd/ui/sentence-case': 'off',
+			'obsidianmd/no-global-this': 'off',
+			'obsidianmd/no-static-styles-assignment': 'off',
+			'obsidianmd/prefer-create-el': 'off',
+			'no-unsanitized/method': 'off',
 		},
 	},
 );
