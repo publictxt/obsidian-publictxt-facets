@@ -1,8 +1,9 @@
-/*
+/* Every rule is scoped under the view's root class (docs/naming.md). */
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+.txt-facets {
+	padding: var(--size-4-4);
+}
 
-If your plugin does not need CSS, delete this file.
-
-*/
+.txt-facets .txt-facets-empty {
+	color: var(--text-muted);
+}
