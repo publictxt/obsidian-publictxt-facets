@@ -19,3 +19,7 @@ npm run deploy [-- <vault>]   # build and copy into <vault>/.obsidian/plugins/tx
 ```
 
 `deploy` defaults to the test vault at `../../test-vaults/txt-cpy`.
+
+## License
+
+GPL-3.0. See `LICENSE`.
