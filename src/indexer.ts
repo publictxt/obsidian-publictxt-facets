@@ -1,7 +1,7 @@
 // Reading the vault into page records: the Obsidian side of derive.ts.
 
 import type { App, TFile } from 'obsidian';
-import { derivePage, isPagePath, isUnpublished, type PageItem } from './derive.ts';
+import { derivePage, isPagePath, isUnpublished, type PageItem } from './page/derive.ts';
 import type { TxtFacetsSettings } from './settings.ts';
 
 /** Files read at once, before giving the UI a turn. */

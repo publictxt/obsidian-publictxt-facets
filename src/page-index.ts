@@ -1,7 +1,8 @@
 // The vault's page records, kept by path. Pure: indexer.ts fills it from
 // Obsidian, the view reads it.
 
-import { parseTime, type PageItem } from './derive.ts';
+import { parseTime } from './page/dates.ts';
+import type { PageItem } from './page/derive.ts';
 
 export class PageIndex {
 	private pages = new Map<string, PageItem>();

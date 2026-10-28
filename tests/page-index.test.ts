@@ -1,6 +1,6 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import type { PageItem } from '../src/derive.ts';
+import type { PageItem } from '../src/page/derive.ts';
 import { PageIndex } from '../src/page-index.ts';
 
 function page(path: string, title: string, created: string): PageItem {
