@@ -1,33 +1,159 @@
-/* Every rule is scoped under the view's root class (docs/naming.md). */
+/* Every rule is scoped under the view's root class (docs/naming.md). Class
+   names and rules follow publictxt-pages' assets/css/main.css, with the
+   site's palette swapped for Obsidian's theme variables. */
 
 .txt-facets {
 	padding: var(--size-4-4);
 }
 
-.txt-facets .txt-facets-status {
+.txt-facets .muted {
 	color: var(--text-muted);
 }
 
-.txt-facets .txt-facets-list {
-	list-style: none;
-	padding: 0;
-	margin: 0;
-}
-
-.txt-facets .txt-facets-list li {
+.txt-facets .txt-facets-bar {
 	display: flex;
+	align-items: center;
+	justify-content: space-between;
 	gap: var(--size-4-2);
-	align-items: baseline;
-	padding: var(--size-2-1) 0;
+	margin-bottom: var(--size-4-3);
 }
 
-.txt-facets .txt-facets-title {
+.txt-facets .txt-facets-compact[aria-pressed='true'] {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+.txt-facets .txt-facets-more {
+	margin-top: var(--size-4-3);
+}
+
+/* Chips */
+
+.txt-facets .chip {
+	display: inline-block;
+	background: var(--tag-background);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 999px;
+	color: var(--text-normal);
+	font-size: 0.78rem;
+	line-height: 1.5;
+	padding: 0.05rem 0.6rem;
+	text-decoration: none;
+	white-space: nowrap;
+}
+
+.txt-facets .chip-collection {
+	background: var(--background-modifier-hover);
+	color: var(--text-accent);
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	font-size: 0.7rem;
+	font-weight: 600;
+}
+
+.txt-facets .chip-link {
+	font-family: var(--font-monospace);
+}
+
+.txt-facets .chip-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.35rem;
+}
+
+.txt-facets .bookmark-links {
+	margin-top: 0.4rem;
+}
+
+.txt-facets .rating {
+	color: var(--text-accent);
+	letter-spacing: 0.05em;
+	white-space: nowrap;
+	margin-left: 0.4rem;
+}
+
+/* Cards */
+
+.txt-facets .result-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.txt-facets .page-card {
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-m);
+	padding: 0.9rem 1.1rem;
+}
+
+.txt-facets .page-card time,
+.txt-facets .page-card-dates > .muted {
+	font-size: 0.8rem;
+}
+
+.txt-facets .page-card-head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 0.75rem;
+}
+
+.txt-facets .page-card-title {
+	font-weight: 600;
+	font-size: 1.02rem;
+	min-width: 0;
+	overflow-wrap: anywhere;
 	cursor: pointer;
 }
 
-.txt-facets .txt-facets-date {
-	margin-left: auto;
+.txt-facets .page-card-collections {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: 0.35rem;
+	flex: 0 1 auto;
+	max-width: 50%;
+}
+
+.txt-facets .page-card-summary {
+	margin: 0.4rem 0 0.5rem;
 	color: var(--text-muted);
-	font-size: var(--font-ui-smaller);
-	font-variant-numeric: tabular-nums;
+	font-size: 0.9rem;
+	overflow-wrap: anywhere;
+}
+
+.txt-facets .page-card .chip-row {
+	margin-top: 0.5rem;
+}
+
+/* Compact: one line per card, title then collections, date and stars. */
+
+.txt-facets .result-list.dense {
+	gap: 0.35rem;
+}
+
+.txt-facets .dense .page-card {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	column-gap: 0.6rem;
+	padding: 0.45rem 0.9rem;
+}
+
+.txt-facets .dense .page-card-head {
+	display: contents;
+}
+
+.txt-facets .dense .page-card-title {
+	flex: 1 1 16rem;
+	font-size: 0.95rem;
+}
+
+.txt-facets .dense .page-card .chip-row,
+.txt-facets .dense .page-card-summary {
+	display: none;
 }

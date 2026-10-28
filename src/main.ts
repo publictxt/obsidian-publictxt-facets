@@ -15,6 +15,11 @@ export default class TxtFacetsPlugin extends Plugin {
 		this.settings = normalizeSettings(await this.loadData());
 
 		this.registerView(VIEW_TYPE, (leaf) => new FacetsView(leaf, this));
+		// Lists the view under Settings → Page preview; previews need Ctrl/Cmd.
+		this.registerHoverLinkSource(VIEW_TYPE, {
+			display: 'Txt Facets',
+			defaultMod: true,
+		});
 
 		this.addRibbonIcon('list-filter', 'Open facets', () => {
 			void this.openView();
