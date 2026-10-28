@@ -1,6 +1,7 @@
 import { Events, Plugin, TFolder, WorkspaceLeaf, type TAbstractFile } from 'obsidian';
 import { pageFor, readAllPages } from './indexer.ts';
 import { INDEX_CHANGED, PageIndex } from './page-index.ts';
+import { PublicTxtFacetsSettingTab } from './settings-tab.ts';
 import { normalizeSettings, type PublicTxtFacetsSettings } from './settings.ts';
 import { FacetsView, VIEW_TYPE } from './ui/view.ts';
 
@@ -37,6 +38,7 @@ export default class PublicTxtFacetsPlugin extends Plugin {
 			display: 'PublicTxt Facets',
 			defaultMod: true,
 		});
+		this.addSettingTab(new PublicTxtFacetsSettingTab(this.app, this));
 
 		this.addRibbonIcon('list-filter', 'Open facets', () => {
 			void this.openView();
@@ -65,6 +67,10 @@ export default class PublicTxtFacetsPlugin extends Plugin {
 				this.app.vault.on('rename', (file, oldPath) => this.onRenamed(file, oldPath)),
 			);
 		});
+	}
+
+	async saveSettings(): Promise<void> {
+		await this.saveData(this.settings);
 	}
 
 	/**
