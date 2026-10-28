@@ -1,4 +1,4 @@
-import { debounce, ItemView, Keymap, WorkspaceLeaf } from 'obsidian';
+import { debounce, ItemView, Keymap, WorkspaceLeaf, type Debouncer, type PaneType } from 'obsidian';
 import {
 	chipCounts,
 	clearBrowseState,
@@ -37,12 +37,16 @@ export class FacetsView extends ItemView {
 	private order = {} as Record<FacetKey, string[]>;
 
 	private titleEl!: HTMLInputElement;
+	/** The title filter's pending run, cancelled when the view closes. */
+	private typed: Debouncer<[], void> | null = null;
 	private filtersEl!: HTMLElement;
 	private results!: Results;
 
 	constructor(leaf: WorkspaceLeaf, plugin: TxtFacetsPlugin) {
 		super(leaf);
 		this.plugin = plugin;
+		// Opening a note from here joins the tab's back/forward history.
+		this.navigation = true;
 	}
 
 	getViewType(): string {
@@ -63,6 +67,7 @@ export class FacetsView extends ItemView {
 		// One click and one hover listener serve every card and chip.
 		this.registerDomEvent(this.contentEl, 'click', (evt) => this.onClick(evt));
 		this.registerDomEvent(this.contentEl, 'mouseover', (evt) => this.onHover(evt));
+		this.registerDomEvent(this.contentEl, 'auxclick', (evt) => this.onAuxClick(evt));
 		// The view's width, not the window's, decides the layout in a pane.
 		const observer = new ResizeObserver(() => {
 			this.contentEl.toggleClass('is-narrow', this.contentEl.clientWidth < NARROW_PX);
@@ -70,6 +75,11 @@ export class FacetsView extends ItemView {
 		observer.observe(this.contentEl);
 		this.register(() => observer.disconnect());
 		if (this.plugin.indexReady) this.onIndexChanged();
+		if (!this.state.title) this.titleEl.focus();
+	}
+
+	async onClose(): Promise<void> {
+		this.typed?.cancel();
 	}
 
 	/** The parts that stay put: the bar, the results and the filter column. */
@@ -84,11 +94,11 @@ export class FacetsView extends ItemView {
 			cls: 'txt-facets-title-filter',
 			attr: { placeholder: 'Filter by title', 'aria-label': 'Filter by title' },
 		});
-		const typed = debounce(() => {
+		const typed = (this.typed = debounce(() => {
 			this.state.title = this.titleEl.value;
 			this.run();
-		}, TYPING_MS, true);
-		this.titleEl.addEventListener('input', typed);
+		}, TYPING_MS, true));
+		this.titleEl.addEventListener('input', () => typed());
 
 		const compact = bar.createEl('button', { text: 'Compact', cls: 'txt-facets-compact' });
 		compact.setAttribute('aria-pressed', 'false');
@@ -101,9 +111,12 @@ export class FacetsView extends ItemView {
 			.addEventListener('click', () => this.clear());
 
 		const layout = root.createDiv({ cls: 'txt-facets-layout' });
-		this.results = new Results(layout.createDiv({ cls: 'txt-facets-results' }), () =>
-			this.plugin.settings.cardsPerBatch,
-		);
+		// aria-live: screen readers announce the new count after each change.
+		const resultsEl = layout.createDiv({
+			cls: 'txt-facets-results',
+			attr: { 'aria-live': 'polite' },
+		});
+		this.results = new Results(resultsEl, () => this.plugin.settings.cardsPerBatch);
 		this.filtersEl = layout.createDiv({ cls: 'txt-facets-filters' });
 		this.results.setStatus('Reading notes…');
 	}
@@ -142,7 +155,10 @@ export class FacetsView extends ItemView {
 		);
 		if (!el) return;
 		const { path, tag, facet, value, match, more } = el.dataset;
-		if (path !== undefined) return this.openNote(path, evt);
+		if (path !== undefined) {
+			evt.preventDefault();
+			return this.openNote(path, Keymap.isModEvent(evt) || this.defaultPane());
+		}
 		if (tag !== undefined) toggleInclude(this.state.facets.tag, tag);
 		else if (facet && value !== undefined) {
 			press(this.state.facets[facet as FacetKey], value, el.dataset.x !== undefined);
@@ -156,16 +172,29 @@ export class FacetsView extends ItemView {
 		this.run();
 	}
 
-	// A title opens its note: where the setting says, or in a new tab (or
-	// split) with Ctrl/Cmd held. Bookmark chips are real links and open in
-	// the browser on their own.
-	private openNote(path: string, evt: MouseEvent): void {
-		const file = this.app.vault.getFileByPath(path);
-		if (!file) return;
+	// Middle-click on a title opens a new tab, as a link would in a browser.
+	private onAuxClick(evt: MouseEvent): void {
+		if (evt.button !== 1) return;
+		const path = (evt.target as HTMLElement).closest<HTMLElement>('a.page-card-title')?.dataset
+			.path;
+		if (!path) return;
 		evt.preventDefault();
+		this.openNote(path, 'tab');
+	}
+
+	/** Where a plain click opens a note, from the openIn setting. */
+	private defaultPane(): PaneType | false {
 		const { openIn } = this.plugin.settings;
-		const pane = Keymap.isModEvent(evt) || (openIn === 'current' ? false : openIn);
-		void this.app.workspace.getLeaf(pane).openFile(file);
+		return openIn === 'current' ? false : openIn;
+	}
+
+	// A title opens its note: where the setting says, or in a new tab (or
+	// split) with Ctrl/Cmd held. Opened by file, not link text, so `#`, `^`
+	// and `|` in a name aren't read as link syntax. Bookmark chips are real
+	// links and open in the browser on their own.
+	private openNote(path: string, pane: PaneType | boolean): void {
+		const file = this.app.vault.getFileByPath(path);
+		if (file) void this.app.workspace.getLeaf(pane).openFile(file);
 	}
 
 	// Page Preview on a title, as for any internal link.
