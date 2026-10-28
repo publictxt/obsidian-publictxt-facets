@@ -37,6 +37,8 @@ src/
     results.ts      status line, cards in batches, Show more
     cards.ts        the page card
 tests/            node:test, one file per module; helpers/fake-cache.ts stands in for MetadataCache
+  view.test.ts    smoke test: the real view in happy-dom, Obsidian stubbed (helpers/obsidian-stub.ts),
+                  opened through open() as Obsidian does. Extend it when the view gains behaviour
 scripts/deploy.mjs
 ```
 
@@ -61,7 +63,7 @@ Run test, build and lint before committing. CI runs all three on Node 24.
 - Delegate events: one listener on the view, `data-*` attributes on the elements.
 - Don't name view methods after Obsidian's lifecycle (`open`, `close`, `load`, `unload`,
   `onload`, …): some, like `View.open`, aren't in `obsidian.d.ts`, so TypeScript won't
-  warn, and the view silently never opens.
+  warn, and the view silently never opens. `tests/view.test.ts` catches this one.
 - Every CSS rule is scoped under `.publictxt-facets`; class names follow the site's `main.css`.
 - Code style: tabs, single quotes; match the file you're in.
 - Lint config allows no inline disables; change `eslint.config.mts` with a reason instead.
