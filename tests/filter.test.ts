@@ -2,6 +2,8 @@ import { describe as suite, test } from 'node:test';
 import assert from 'node:assert/strict';
 import type { PageItem } from '../src/page/derive.ts';
 import {
+	browseStateFromJSON,
+	browseStateToJSON,
 	chipCounts,
 	chipState,
 	clearBrowseState,
@@ -206,5 +208,56 @@ suite('status line', () => {
 		s.sort = 'title';
 		clearBrowseState(s);
 		assert.deepEqual(s, emptyBrowseState());
+	});
+});
+
+suite('browse state JSON', () => {
+	test('round-trips through JSON', () => {
+		const s = emptyBrowseState();
+		s.title = 'net';
+		s.facets.collection.inc.add('wiki');
+		s.facets.category.inc.add('Tech');
+		s.facets.tag.inc = new Set(['a', 'b']);
+		s.facets.tag.exc.add('c');
+		s.facets.tag.match = 'any';
+		s.rating = '4';
+		s.sort = 'title desc';
+		const json = JSON.parse(JSON.stringify(browseStateToJSON(s))) as unknown;
+		assert.deepEqual(browseStateFromJSON(json), s);
+	});
+
+	test('nothing saved, or junk, gives the empty state', () => {
+		assert.deepEqual(browseStateFromJSON(undefined), emptyBrowseState());
+		assert.deepEqual(browseStateFromJSON('junk'), emptyBrowseState());
+		assert.deepEqual(browseStateFromJSON({ facets: 'x', title: 3 }), emptyBrowseState());
+	});
+
+	test('malformed parts fall back, one by one', () => {
+		const s = browseStateFromJSON({
+			title: 'ok',
+			facets: {
+				tag: { inc: ['#Brain', 7, '', 'both'], exc: 'nope', match: 'some' },
+				collection: { inc: [' Wiki '], exc: [], match: 'all' },
+				nonsense: { inc: ['x'] },
+			},
+			rating: '9',
+			sort: 'TITLE asc',
+		});
+		assert.equal(s.title, 'ok');
+		assert.deepEqual([...s.facets.tag.inc], ['brain', 'both']);
+		assert.equal(s.facets.tag.exc.size, 0);
+		assert.equal(s.facets.tag.match, 'all');
+		assert.deepEqual([...s.facets.collection.inc], ['wiki']);
+		assert.equal(s.facets.collection.match, 'all');
+		assert.equal(s.rating, '');
+		assert.equal(s.sort, 'title');
+	});
+
+	test('categories keep their spelling; included and excluded stays excluded', () => {
+		const s = browseStateFromJSON({
+			facets: { category: { inc: ['Tech', 'Art'], exc: ['Art'] } },
+		});
+		assert.deepEqual([...s.facets.category.inc], ['Tech']);
+		assert.deepEqual([...s.facets.category.exc], ['Art']);
 	});
 });
