@@ -16,6 +16,7 @@ import type PublicTxtFacetsPlugin from '../main.ts';
 import { INDEX_CHANGED } from '../page-index.ts';
 import { renderFilters } from './filters.ts';
 import { Results } from './results.ts';
+import { DEFAULT_SORT } from '../sort.ts';
 
 export const VIEW_TYPE = 'publictxt-facets';
 
@@ -129,7 +130,7 @@ export class FacetsView extends ItemView {
 	}
 
 	private onIndexChanged(): void {
-		const totals = countValues(this.plugin.index.newest());
+		const totals = countValues(this.plugin.index.all());
 		for (const d of FACETS) this.order[d.key] = sortedKeys(totals[d.key]);
 		this.run();
 	}
@@ -137,7 +138,7 @@ export class FacetsView extends ItemView {
 	/** Filter, count and draw: after every change to the state or the index. */
 	private run(): void {
 		if (!this.plugin.indexReady) return;
-		const pages = this.plugin.index.newest();
+		const pages = this.plugin.index.sorted(DEFAULT_SORT);
 		const shown = filterPages(pages, this.state);
 		const counts = chipCounts(pages, this.state, shown);
 		renderFilters(this.filtersEl, this.state, this.order, counts, this.expanded);
