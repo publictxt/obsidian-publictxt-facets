@@ -58,6 +58,9 @@ Run test, build and lint before committing. CI runs all three on Node 24.
 - No regex lookbehinds: iOS before 16.4 can't parse them, and one stops the plugin loading.
 - Build DOM with `createEl`/`createDiv`, never `innerHTML`: vault text is never markup.
 - Delegate events: one listener on the view, `data-*` attributes on the elements.
+- Don't name view methods after Obsidian's lifecycle (`open`, `close`, `load`, `unload`,
+  `onload`, …): some, like `View.open`, aren't in `obsidian.d.ts`, so TypeScript won't
+  warn, and the view silently never opens.
 - Every CSS rule is scoped under `.txt-facets`; class names follow the site's `main.css`.
 - Code style: tabs, single quotes; match the file you're in.
 - Lint config allows no inline disables; change `eslint.config.mts` with a reason instead.

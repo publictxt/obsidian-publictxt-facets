@@ -142,7 +142,7 @@ export class FacetsView extends ItemView {
 		);
 		if (!el) return;
 		const { path, tag, facet, value, match, more } = el.dataset;
-		if (path !== undefined) return this.open(path, evt);
+		if (path !== undefined) return this.openNote(path, evt);
 		if (tag !== undefined) toggleInclude(this.state.facets.tag, tag);
 		else if (facet && value !== undefined) {
 			press(this.state.facets[facet as FacetKey], value, el.dataset.x !== undefined);
@@ -159,7 +159,7 @@ export class FacetsView extends ItemView {
 	// A title opens its note: where the setting says, or in a new tab (or
 	// split) with Ctrl/Cmd held. Bookmark chips are real links and open in
 	// the browser on their own.
-	private open(path: string, evt: MouseEvent): void {
+	private openNote(path: string, evt: MouseEvent): void {
 		const file = this.app.vault.getFileByPath(path);
 		if (!file) return;
 		evt.preventDefault();
