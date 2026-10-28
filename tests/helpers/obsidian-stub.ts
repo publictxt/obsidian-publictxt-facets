@@ -31,6 +31,12 @@ export class ItemView extends Component {
 		this.contentEl = document.createElement('div');
 	}
 
+	getState(): Record<string, unknown> {
+		return {};
+	}
+
+	async setState(_state: unknown, _result: unknown): Promise<void> {}
+
 	async onOpen(): Promise<void> {}
 
 	async onClose(): Promise<void> {}

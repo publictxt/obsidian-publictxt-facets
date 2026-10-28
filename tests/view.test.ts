@@ -35,15 +35,26 @@ before(async () => {
 	FacetsView = await loadFacetsView();
 });
 
-/** A view opened on the fixture, with what it opened recorded. */
-async function openView() {
+interface OpenOptions {
+	/** Handed to setState before open, as Obsidian does when restoring a layout. */
+	state?: unknown;
+	/** False: the index is still being built when the view opens. */
+	indexReady?: boolean;
+}
+
+/** A view opened on the fixture, with what it opened and saved recorded. */
+async function openView(opts: OpenOptions = {}) {
 	const opened: string[] = [];
+	const saves = { count: 0 };
 	const index = new PageIndex();
 	index.replaceAll(fixturePages());
 	const app = {
 		vault: { getFileByPath: (path: string) => ({ path }) },
 		workspace: {
 			trigger: () => undefined,
+			requestSaveLayout: () => {
+				saves.count++;
+			},
 			getLeaf: (pane: unknown) => ({
 				openFile: async (f: { path: string }) => {
 					opened.push(`${f.path} in ${String(pane)}`);
@@ -51,13 +62,25 @@ async function openView() {
 			}),
 		},
 	};
+	const listeners: (() => void)[] = [];
 	const plugin = {
 		index,
-		indexReady: true,
-		events: { on: () => ({}) },
+		indexReady: opts.indexReady ?? true,
+		events: {
+			on: (_name: string, cb: () => void) => {
+				listeners.push(cb);
+				return {};
+			},
+		},
 		settings: { cardsPerBatch: 20, openIn: 'current' },
 	};
+	/** What the plugin does after a build or a burst of live updates. */
+	const indexChanged = () => {
+		plugin.indexReady = true;
+		for (const cb of listeners) cb();
+	};
 	const view: SmokeView = new FacetsView({ app }, plugin);
+	if (opts.state !== undefined) await view.setState(opts.state, {});
 	await view.open(document.createElement('div'));
 	const root = view.contentEl;
 	const $ = (sel: string) => {
@@ -75,7 +98,7 @@ async function openView() {
 			.map((a) => a.textContent);
 	const chip = (facet: string, value: string, x = false) =>
 		`[data-facet="${facet}"][data-value="${value}"]${x ? '[data-x]' : ':not([data-x])'}`;
-	return { view, root, $, click, status, cards, titles, chip, opened };
+	return { view, root, $, click, status, cards, titles, chip, opened, saves, index, indexChanged };
 }
 
 describe('the view', () => {
@@ -171,5 +194,85 @@ describe('the view', () => {
 			'blog/page-24.md in tab',
 			'blog/page-24.md in tab',
 		]);
+	});
+});
+
+describe('saved state', () => {
+	test('round-trips through getState and setState, compact included', async () => {
+		const a = await openView();
+		a.click(a.chip('collection', 'wiki'));
+		a.click(a.chip('tag', 'odd', true));
+		a.click('[data-rating="3"]');
+		a.click('.publictxt-facets-compact');
+		const sort = a.$('.publictxt-facets-sort') as HTMLSelectElement;
+		sort.value = 'title';
+		sort.dispatchEvent(new win.Event('change', { bubbles: true }) as unknown as Event);
+		const saved = JSON.parse(JSON.stringify(a.view.getState())) as unknown;
+
+		const b = await openView({ state: saved });
+		assert.equal(b.status(), a.status());
+		assert.equal(b.status(), '3 pages — wiki · not #odd · ★3+');
+		assert.equal(b.$('.publictxt-facets-compact').getAttribute('aria-pressed'), 'true');
+		assert.ok(b.$('.result-list').classList.contains('dense'));
+		assert.equal((b.$('.publictxt-facets-sort') as HTMLSelectElement).value, 'title');
+		assert.deepEqual(b.titles(), a.titles());
+	});
+
+	test('setState after open redraws the controls and results', async () => {
+		const v = await openView();
+		await v.view.setState({ browse: { title: 'page 1', sort: 'title desc' } }, {});
+		assert.equal(v.status(), '10 pages — “page 1”');
+		assert.equal((v.$('.publictxt-facets-title-filter') as HTMLInputElement).value, 'page 1');
+		assert.deepEqual(v.titles(), ['Page 19', 'Page 18', 'Page 17']);
+	});
+
+	test('state that arrives before the index is applied once it is built', async () => {
+		const v = await openView({
+			state: { browse: { facets: { collection: { inc: ['blog'] } } } },
+			indexReady: false,
+		});
+		assert.equal(v.status(), 'Reading notes…');
+		v.indexChanged();
+		assert.equal(v.status(), '10 pages — blog');
+	});
+
+	test('a malformed state falls back without breaking the view', async () => {
+		const v = await openView({ state: { browse: 'junk', compact: 'yes' } });
+		assert.equal(v.status(), '25 pages');
+		assert.equal(v.$('.publictxt-facets-compact').getAttribute('aria-pressed'), 'false');
+		const w = await openView({ state: { browse: { facets: { tag: { inc: [1, null] } } } } });
+		assert.equal(w.status(), '25 pages');
+	});
+
+	test('the layout is saved on user changes, not on index updates', async () => {
+		const v = await openView();
+		assert.equal(v.saves.count, 0);
+		v.click(v.chip('collection', 'wiki'));
+		v.click('.publictxt-facets-compact');
+		assert.equal(v.saves.count, 2);
+		v.indexChanged();
+		v.click('.publictxt-facets-more');
+		assert.equal(v.saves.count, 2);
+	});
+
+	test('an index update keeps Show more progress and follows the change', async () => {
+		const v = await openView();
+		v.click('.publictxt-facets-more');
+		assert.equal(v.cards(), 25);
+		v.index.remove('blog/page-24.md');
+		v.indexChanged();
+		assert.equal(v.status(), '24 pages');
+		assert.equal(v.cards(), 24);
+	});
+
+	test('a set value no page carries still has a chip to clear it', async () => {
+		const v = await openView({
+			state: { browse: { facets: { tag: { inc: ['gone'] } }, rating: '4' } },
+		});
+		assert.equal(v.status(), '0 pages — #gone · ★4+');
+		v.click(v.chip('tag', 'gone'));
+		v.click('[data-rating="4"]');
+		assert.equal(v.status(), '25 pages');
+		assert.equal(v.root.querySelectorAll(v.chip('tag', 'gone')).length, 0);
 	});
 });

@@ -1,5 +1,15 @@
-import { debounce, ItemView, Keymap, WorkspaceLeaf, type Debouncer, type PaneType } from 'obsidian';
 import {
+	debounce,
+	ItemView,
+	Keymap,
+	WorkspaceLeaf,
+	type Debouncer,
+	type PaneType,
+	type ViewStateResult,
+} from 'obsidian';
+import {
+	browseStateFromJSON,
+	browseStateToJSON,
 	chipCounts,
 	clearBrowseState,
 	countValues,
@@ -28,12 +38,12 @@ const NARROW_PX = 640;
 const TYPING_MS = 200;
 
 // The facets view: owns the browse state, lays out the bar, results and
-// filter column, and handles every click through data-* attributes.
-// Saved state arrives in a later slice (docs/spec.md).
+// filter column, and handles every click through data-* attributes. The
+// browse state and the compact toggle are saved with the workspace layout.
 export class FacetsView extends ItemView {
 	private plugin: PublicTxtFacetsPlugin;
 	private state = emptyBrowseState();
-	/** One line per card. Not saved yet: that's the saved-state slice. */
+	/** One line per card. */
 	private compact = false;
 	/** Facets showing every chip, not just the first CHIP_LIMIT. */
 	private expanded = new Set<FacetKey>();
@@ -42,8 +52,11 @@ export class FacetsView extends ItemView {
 	/** Rating chips to offer, from the ratings any page has. */
 	private ratings: RatingFilter[] = [];
 
+	/** Set once onOpen has drawn the view; setState can come before that. */
+	private built = false;
 	private titleEl!: HTMLInputElement;
 	private sortEl!: HTMLSelectElement;
+	private compactEl!: HTMLElement;
 	/** The title filter's pending run, cancelled when the view closes. */
 	private typed: Debouncer<[], void> | null = null;
 	private filtersEl!: HTMLElement;
@@ -68,8 +81,30 @@ export class FacetsView extends ItemView {
 		return 'list-filter';
 	}
 
+	getState(): Record<string, unknown> {
+		return {
+			...super.getState(),
+			browse: browseStateToJSON(this.state),
+			compact: this.compact,
+		};
+	}
+
+	// Obsidian may call this before onOpen: the state is kept and drawn once
+	// the view exists, and applied when the index is ready.
+	async setState(state: unknown, result: ViewStateResult): Promise<void> {
+		if (typeof state === 'object' && state !== null && 'browse' in state) {
+			const r = state as Record<string, unknown>;
+			this.state = browseStateFromJSON(r.browse);
+			this.compact = r.compact === true;
+			if (this.built) this.showState();
+		}
+		await super.setState(state, result);
+	}
+
 	async onOpen(): Promise<void> {
 		this.build();
+		this.built = true;
+		this.showState();
 		this.registerEvent(this.plugin.events.on(INDEX_CHANGED, () => this.onIndexChanged()));
 		// One click and one hover listener serve every card and chip.
 		this.registerDomEvent(this.contentEl, 'click', (evt) => this.onClick(evt));
@@ -81,7 +116,6 @@ export class FacetsView extends ItemView {
 		});
 		observer.observe(this.contentEl);
 		this.register(() => observer.disconnect());
-		if (this.plugin.indexReady) this.onIndexChanged();
 		if (!this.state.title) this.titleEl.focus();
 	}
 
@@ -103,7 +137,7 @@ export class FacetsView extends ItemView {
 		});
 		const typed = (this.typed = debounce(() => {
 			this.state.title = this.titleEl.value;
-			this.run();
+			this.stateChanged();
 		}, TYPING_MS, true));
 		this.titleEl.addEventListener('input', () => typed());
 
@@ -112,18 +146,16 @@ export class FacetsView extends ItemView {
 			attr: { 'aria-label': 'Sort' },
 		});
 		for (const [value, label] of SORTS) this.sortEl.createEl('option', { value, text: label });
-		this.sortEl.value = this.state.sort;
 		this.sortEl.addEventListener('change', () => {
 			this.state.sort = this.sortEl.value;
-			this.run();
+			this.stateChanged();
 		});
 
-		const compact = bar.createEl('button', { text: 'Compact', cls: 'publictxt-facets-compact' });
-		compact.setAttribute('aria-pressed', 'false');
-		compact.addEventListener('click', () => {
+		this.compactEl = bar.createEl('button', { text: 'Compact', cls: 'publictxt-facets-compact' });
+		this.compactEl.addEventListener('click', () => {
 			this.compact = !this.compact;
-			compact.setAttribute('aria-pressed', String(this.compact));
-			this.results.setCompact(this.compact);
+			this.showCompact();
+			this.app.workspace.requestSaveLayout();
 		});
 		bar.createEl('button', { text: 'Clear', cls: 'publictxt-facets-clear' })
 			.addEventListener('click', () => this.clear());
@@ -143,20 +175,50 @@ export class FacetsView extends ItemView {
 		clearBrowseState(this.state);
 		this.titleEl.value = '';
 		this.sortEl.value = this.state.sort;
-		this.run();
+		this.stateChanged();
 		this.titleEl.focus();
 	}
 
-	private onIndexChanged(): void {
+	/** Draw the whole state into the controls, then the results. */
+	private showState(): void {
+		this.titleEl.value = this.state.title;
+		this.sortEl.value = this.state.sort;
+		this.showCompact();
+		if (this.plugin.indexReady) this.onIndexChanged(false);
+	}
+
+	private showCompact(): void {
+		this.compactEl.setAttribute('aria-pressed', String(this.compact));
+		this.results.setCompact(this.compact);
+	}
+
+	/**
+	 * The user changed the browse state: run it and have the layout saved.
+	 * Only here, never on index updates, or every edit in the vault would
+	 * rewrite workspace.json.
+	 */
+	private stateChanged(): void {
+		this.run();
+		this.app.workspace.requestSaveLayout();
+	}
+
+	/**
+	 * New chip order and rating choices, then a re-run. An index update
+	 * keeps the cards shown and the scroll position, so editing a note
+	 * elsewhere doesn't undo "Show more".
+	 */
+	private onIndexChanged(keepShown = true): void {
 		const all = this.plugin.index.all();
 		const totals = countValues(all);
 		for (const d of FACETS) this.order[d.key] = sortedKeys(totals[d.key]);
 		this.ratings = ratingChoices(all);
-		this.run();
+		const top = this.contentEl.scrollTop;
+		this.run(keepShown);
+		if (keepShown) this.contentEl.scrollTop = top;
 	}
 
 	/** Filter, count and draw: after every change to the state or the index. */
-	private run(): void {
+	private run(keepShown = false): void {
 		if (!this.plugin.indexReady) return;
 		const pages = this.plugin.index.sorted(this.state.sort);
 		const shown = filterPages(pages, this.state);
@@ -173,7 +235,7 @@ export class FacetsView extends ItemView {
 		this.results.setStatus(
 			`${n} page${n === 1 ? '' : 's'}` + (parts.length ? ` — ${parts.join(' · ')}` : ''),
 		);
-		this.results.show(shown, this.state.facets.tag.inc);
+		this.results.show(shown, this.state.facets.tag.inc, keepShown);
 	}
 
 	private onClick(evt: MouseEvent): void {
@@ -186,19 +248,22 @@ export class FacetsView extends ItemView {
 			evt.preventDefault();
 			return this.openNote(path, Keymap.isModEvent(evt) || this.defaultPane());
 		}
+		// "+N more" is how the column looks, not what it shows: not saved.
+		if (more) {
+			const key = more as FacetKey;
+			if (!this.expanded.delete(key)) this.expanded.add(key);
+			return this.run(true);
+		}
 		if (tag !== undefined) toggleInclude(this.state.facets.tag, tag);
 		else if (facet && value !== undefined) {
 			press(this.state.facets[facet as FacetKey], value, el.dataset.x !== undefined);
 		} else if (match) {
 			const f = this.state.facets[match as FacetKey];
 			f.match = f.match === 'all' ? 'any' : 'all';
-		} else if (more) {
-			const key = more as FacetKey;
-			if (!this.expanded.delete(key)) this.expanded.add(key);
 		} else if (rating !== undefined) {
 			this.state.rating = this.state.rating === rating ? '' : (rating as RatingFilter);
 		}
-		this.run();
+		this.stateChanged();
 	}
 
 	// Middle-click on a title opens a new tab, as a link would in a browser.
