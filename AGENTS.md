@@ -11,7 +11,7 @@ Read before changing behaviour or names; keep them in step in the same change.
 - `docs/intent.md`: why, decisions, open questions
 - `docs/spec.md`: what it does, and the build order
 - `docs/naming.md`: names, ids and vocabulary. Plugin id, view type and command ids are
-  stable once released.
+  released (1.0.0): never rename them.
 
 The site's rules, which the page rules follow, are in the Pages repo: `docs/SPEC.md`,
 `scripts/sync_content.py`, `scripts/dates.py`, `assets/js/facets.js`, `assets/js/cards.js`.
@@ -57,6 +57,21 @@ npm run deploy [-- <vault>]   # build, copy into the test vault (../../test-vaul
 ```
 
 Run test, build and lint before committing. CI runs all three on Node 24.
+
+## Releasing
+
+Prepare on a `release/x.y.z` branch (README, docs) and merge it. Then, on `master`:
+
+```sh
+npm version x.y.z   # package.json, manifest.json, versions.json; commits and tags x.y.z (no "v")
+git push && git push --tags
+```
+
+The tag runs `release.yml`: build, test, lint, then a **draft** GitHub release with `main.js`,
+`manifest.json` and `styles.css`. Publish the draft by hand. The community directory
+(community.obsidian.md) reads `manifest.json` from `master` and reviews every version
+automatically; fixes ship as a new patch version, never by moving a tag. Bump `minAppVersion`
+first if the release needs newer APIs; `version-bump.mjs` copies it into `versions.json`.
 
 ## Conventions
 

@@ -1,6 +1,6 @@
 # PublicTxt Facets — Intent
 
-> **Draft.** Carries the archive's intent forward (`obsidian-search-facets-archived/docs/intent.md`),
+> Carries the archive's intent forward (`obsidian-search-facets-archived/docs/intent.md`),
 > updated for [PublicTxt-Pages](https://github.com/publictxt/publictxt-pages) (formerly txt-hugo)
 > and the decisions below. Names are defined in `naming.md`.
 
