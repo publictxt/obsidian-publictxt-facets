@@ -13,7 +13,7 @@ type Key = keyof PublicTxtFacetsSettings;
 const TYPING_MS = 600;
 
 /** Rebuild at once: a toggle or a dropdown. */
-const REBUILD_NOW: readonly Key[] = ['collectionFromFolder', 'tagsFrom'];
+const REBUILD_NOW: readonly Key[] = ['collectionFromFolder', 'tagsFrom', 'useCategories', 'useRatings'];
 /** Rebuild once typing pauses: the text areas. */
 const REBUILD_SOON: readonly Key[] = ['excludedFolders', 'categories'];
 
@@ -55,9 +55,20 @@ export class PublicTxtFacetsSettingTab extends PluginSettingTab {
 				},
 			},
 			{
+				name: 'Use categories',
+				desc: 'Filter by front matter category. Off: no category facet.',
+				control: { type: 'toggle', key: 'useCategories' },
+			},
+			{
 				name: 'Categories',
 				desc: 'One per line, or separated by commas. Only these count, in this spelling. Empty: any value counts.',
 				control: { type: 'textarea', key: 'categories', rows: 4 },
+				visible: () => this.plugin.settings.useCategories,
+			},
+			{
+				name: 'Use ratings',
+				desc: 'Filter and sort by front matter rating, and show stars on cards. Off: no ratings.',
+				control: { type: 'toggle', key: 'useRatings' },
 			},
 			{
 				name: 'Open notes in',
@@ -93,6 +104,8 @@ export class PublicTxtFacetsSettingTab extends PluginSettingTab {
 		const { plugin } = this;
 		plugin.settings = normalizeSettings({ ...plugin.settings, [key]: value });
 		await plugin.saveSettings();
+		// The categories list shows only while categories are used.
+		if (key === 'useCategories') this.refreshDomState();
 		if (REBUILD_NOW.includes(key as Key)) void plugin.buildIndex();
 		if (REBUILD_SOON.includes(key as Key)) this.rebuildSoon();
 	}

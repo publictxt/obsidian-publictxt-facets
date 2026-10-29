@@ -38,7 +38,7 @@ export interface FileInfo {
 
 export type DeriveOptions = Pick<
 	PublicTxtFacetsSettings,
-	'collectionFromFolder' | 'tagsFrom' | 'categories'
+	'collectionFromFolder' | 'tagsFrom' | 'useCategories' | 'categories' | 'useRatings'
 >;
 
 // ---- which files are pages ------------------------------------------------
@@ -220,9 +220,9 @@ export function derivePage(
 			bookmarks.length > 0,
 			opts.collectionFromFolder,
 		),
-		categories: deriveCategories(fm, opts.categories),
+		categories: opts.useCategories ? deriveCategories(fm, opts.categories) : [],
 		tags: deriveTags(fm, cache, opts.tagsFrom),
-		rating: deriveRating(fm),
+		rating: opts.useRatings ? deriveRating(fm) : 0,
 		...deriveDates(fm, file.path, file.stat),
 		summary: deriveSummary(text, fromH1),
 		bookmarks,
