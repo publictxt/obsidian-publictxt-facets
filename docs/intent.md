@@ -37,7 +37,9 @@ Three things follow from that:
    chips to include or exclude, watch the counts change, and open a page.
 3. **A step toward PublicTxt's aggregate view**: pulling pages from other people's repos into one
    local place to browse. This plugin would be the browsing part. It doesn't aggregate anything
-   itself.
+   itself: pulling repos into the vault is a separate Obsidian plugin, in progress (2026-10-29),
+   which keeps this one free of network access. Once that one is public, the README can link it
+   as related; until then the README mentions aggregation only as an aim.
 
 ## Who it is for
 
