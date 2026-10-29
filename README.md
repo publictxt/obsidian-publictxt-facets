@@ -4,16 +4,15 @@ Browse any vault by collection, category, tag and rating. Click chips to include
 values, watch the counts change as you go, and read the results as cards sorted by date, title
 or rating.
 
-<!-- TODO screenshots: the view with cards and a few chips set; the compact view.
-     ![PublicTxt Facets](docs/images/facets.png) -->
+![Pages tagged #podcast but not #sci or #brain, with counts on every chip](docs/screenshots/tags-included-excluded.png)
 
-It shares the concepts of [PublicTxt-Pages](https://github.com/publictxt/publictxt-pages)' browse
-lists and search page, so it suits a PublicTxt repository written in Obsidian. Nothing requires
-PublicTxt conventions, though: it works in any vault.
+It shares the concepts of [PublicTxt-Pages](https://github.com/publictxt/publictxt-pages)' browse lists and search page, so it suits a PublicTxt repository written in Obsidian. Nothing requires PublicTxt conventions, though: it works in any vault.
 
 ## Using it
 
 Open the view from the ribbon (the filter icon) or the command **PublicTxt Facets: Open**.
+
+![The view: compact cards on the left, rating, collection, category and tag chips on the right](docs/screenshots/default-view.png)
 
 - **Chips.** Each collection, category and tag value is a chip. Click a chip to include it,
   click its ✕ to exclude it, click again to clear it.
@@ -24,12 +23,11 @@ Open the view from the ribbon (the filter icon) or the command **PublicTxt Facet
   hidden.
 - **Rating.** Pick one: 5 to 1 stars means "at least this many", or *unrated*.
 - **Title filter.** The text box keeps pages whose title contains what you type.
-- **Sort.** Newest (the default), Oldest, Title A→Z and Z→A, Recently and Least recently updated,
-  Top and Lowest rated.
-- **Cards.** Each card shows the title, collections, dates, rating, a summary, tags and bookmark
-  links. Click the title to open the note, Ctrl/Cmd-click for a new tab, and hover for Page
-  Preview. Click a card's tag to filter by it. **Compact** shows one line per card.
+- **Sort.** Newest (the default), Oldest, Title A→Z and Z→A, Recently and Least recently updated, Top and Lowest rated.
+- **Cards.** Each card shows the title, collections, dates, rating, a summary, tags and bookmark links. Click the title to open the note, Ctrl/Cmd-click for a new tab, and hover for Page Preview. Click a card's tag to filter by it. **Compact** shows one line per card.
 - **Clear** resets every filter and the sort.
+
+![The sort menu](docs/screenshots/sort-options.png)
 
 The view remembers its filters with the workspace, and follows your edits: notes you create,
 change, rename or delete update the results as you write.
@@ -45,7 +43,7 @@ Every Markdown note is a page, except notes in excluded folders, `README.md`, `L
 | Collections | the note's top-level folder (`page` at the root), front matter `collections`, and `bookmarks` if it has a bookmark URL |
 | Categories | front matter `category` or `categories` |
 | Tags | front matter `tags` and inline `#tags` |
-| Rating | front matter `rating`, a whole number 1 to 5 |
+| Rating | front matter `rating`, a whole number 1 to 5. Unrated content is given a rating of 2.5 so it appears between rating 2 and 3 in rating - sort order|
 | Created | front matter `created` or `date`, else a date in the file name or path, else the file's creation time |
 | Updated | front matter `updated` or `lastmod`, else the file's modification time |
 | Bookmarks | front matter `bookmark` or `bookmarks` (web links) |
@@ -76,6 +74,8 @@ None has a default hotkey. Set one in **Settings → Hotkeys**.
 | Use ratings | on |
 | Open notes in | current tab |
 | Cards per batch | 20 |
+
+![The settings tab](docs/screenshots/settings.png)
 
 ## Compatibility and privacy
 
