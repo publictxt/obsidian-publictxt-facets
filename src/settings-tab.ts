@@ -24,6 +24,8 @@ export class PublicTxtFacetsSettingTab extends PluginSettingTab {
 	constructor(app: App, plugin: PublicTxtFacetsPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
+		// Beside the tab's name in the settings sidebar and in settings search.
+		this.icon = 'list-filter';
 		this.rebuildSoon = debounce(() => void plugin.buildIndex(), TYPING_MS, true);
 	}
 
