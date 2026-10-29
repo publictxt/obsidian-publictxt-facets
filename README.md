@@ -12,7 +12,7 @@ It shares the concepts of [PublicTxt-Pages](https://github.com/publictxt/publict
 
 Open the view from the ribbon (the filter icon) or the command **PublicTxt Facets: Open**.
 
-![The view: compact cards on the left, rating, collection, category and tag chips on the right](docs/screenshots/default-view.png)
+![The view: cards on the left, rating, collection, category and tag chips on the right](docs/screenshots/default-view.png)
 
 - **Chips.** Each collection, category and tag value is a chip. Click a chip to include it,
   click its ✕ to exclude it, click again to clear it.
@@ -28,6 +28,10 @@ Open the view from the ribbon (the filter icon) or the command **PublicTxt Facet
 - **Clear** resets every filter and the sort.
 
 ![The sort menu](docs/screenshots/sort-options.png)
+
+![Compact cards: one line each, with title, collections, date and stars](docs/screenshots/compact-view.png)
+
+![The title filter: three pages with "huma" in the title, and the chip counts narrowed to them](docs/screenshots/title-filter.png)
 
 The view remembers its filters with the workspace, and follows your edits: notes you create,
 change, rename or delete update the results as you write.
@@ -80,8 +84,11 @@ None has a default hotkey. Set one in **Settings → Hotkeys**.
 ## Compatibility and privacy
 
 - Obsidian 1.13 or later, on desktop and mobile.
+- Colours come from your theme, light or dark.
 - Read-only: it never changes your notes.
 - No network access and no telemetry. Nothing leaves your vault.
+
+![The view in the default light theme](docs/screenshots/default-view-light.png)
 
 ## Development
 
