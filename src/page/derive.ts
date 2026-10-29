@@ -46,6 +46,9 @@ export type DeriveOptions = Pick<
 // The sync step's housekeeping files, at any depth.
 const SKIP_NAMES = new Set(['README.md', 'LICENSE.md', 'CONTRIBUTING.md']);
 
+/** A folder's index page (Hugo's section page). */
+const INDEX_NAME = '_index.md';
+
 // `publish:` values that keep a page off the site. YAML may hand these over
 // as a boolean or a number.
 const UNPUBLISHED = new Set(['off', 'false', 'no', '0']);
@@ -95,16 +98,30 @@ function dedupe(values: string[]): string[] {
 
 // ---- title, collections, categories, tags, rating, bookmarks -----------------
 
+/**
+ * The title when there's no `title:` and no H1, as the site's sync step
+ * makes it: the file name with `-` and `_` as spaces; a folder index takes
+ * its folder's name, with `-` as spaces. The root index has no folder, so
+ * it falls back to its file name ("index").
+ */
+export function fallbackTitle(file: Pick<FileInfo, 'path' | 'name' | 'basename'>): string {
+	const fromName = file.basename.replace(/[-_]/g, ' ').trim();
+	if (file.name !== INDEX_NAME) return fromName;
+	const parts = file.path.split('/');
+	const folder = parts.length > 1 ? parts[parts.length - 2] : '';
+	return folder ? folder.replace(/-/g, ' ') : fromName;
+}
+
 export function deriveTitle(
 	fm: FrontMatter,
 	cache: CachedMetadata | null | undefined,
-	basename: string,
+	file: Pick<FileInfo, 'path' | 'name' | 'basename'>,
 ): { title: string; fromH1: boolean } {
 	const explicit = fmString(fm.title);
 	if (explicit) return { title: explicit, fromH1: false };
 	const h1 = cache?.headings?.find((h) => h.level === 1)?.heading.trim();
 	if (h1) return { title: h1, fromH1: true };
-	return { title: basename, fromH1: false };
+	return { title: fallbackTitle(file), fromH1: false };
 }
 
 /** The top-level folder, `''` at the vault root. */
@@ -192,7 +209,7 @@ export function derivePage(
 	opts: DeriveOptions,
 ): PageItem {
 	const fm: FrontMatter = cache?.frontmatter ?? {};
-	const { title, fromH1 } = deriveTitle(fm, cache, file.basename);
+	const { title, fromH1 } = deriveTitle(fm, cache, file);
 	const bookmarks = deriveBookmarks(fm);
 	return {
 		path: file.path,

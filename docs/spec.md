@@ -17,7 +17,7 @@ A **page** is any `.md` file except:
 
 | Field | Rule |
 |---|---|
-| `title` | front matter `title`, else the first H1, else the file name |
+| `title` | front matter `title`, else the first H1, else the file name with `-` and `_` as spaces. An `_index.md` takes its folder's name instead, with `-` as spaces (the root's stays `index`), as the site's sync step does |
 | `collections` | top-level folder (setting; `page` at root) ∪ front matter `collections` (value or list) ∪ `bookmarks` if there's a bookmark URL. Lower-case, deduped |
 | `categories` | front matter `categories` / `category` (value or list), case-insensitive. With a settings list: only listed values, in the list's spelling. With an empty list: any value, lower-case |
 | `tags` | front matter `tags` and/or inline `#tags` (setting), via Obsidian's metadata cache. Lower-case, no `#`, deduped |

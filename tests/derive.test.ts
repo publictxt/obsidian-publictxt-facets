@@ -67,8 +67,22 @@ describe('title', () => {
 		assert.equal(p.title, 'Heading');
 		assert.equal(p.summary, 'Body.');
 	});
-	test('else the file name', () => {
+	test('else the file name, with - and _ as spaces', () => {
 		assert.equal(derive('wiki/My note.md', 'Body.').title, 'My note');
+		assert.equal(derive('wiki/my-note_two.md', 'Body.').title, 'my note two');
+	});
+	test("a folder index without one takes its folder's name, with - as spaces", () => {
+		assert.equal(derive('bookmarks/_index.md', 'Body.').title, 'bookmarks');
+		assert.equal(derive('wiki/Content/Podcasts/_index.md', '').title, 'Podcasts');
+		assert.equal(derive('wiki/Computer-Science/_index.md', '').title, 'Computer Science');
+		assert.equal(derive('wiki/my_folder/_index.md', '').title, 'my_folder');
+	});
+	test('the root index takes its file name', () => {
+		assert.equal(derive('_index.md', 'Body.').title, 'index');
+	});
+	test('a folder index keeps its own title or H1', () => {
+		assert.equal(derive('blog/_index.md', '# Blog\nBody.\n').title, 'Blog');
+		assert.equal(derive('blog/_index.md', note('title: Posts')).title, 'Posts');
 	});
 });
 
