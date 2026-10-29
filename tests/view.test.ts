@@ -40,6 +40,8 @@ interface OpenOptions {
 	state?: unknown;
 	/** False: the index is still being built when the view opens. */
 	indexReady?: boolean;
+	useCategories?: boolean;
+	useRatings?: boolean;
 }
 
 /** A view opened on the fixture, with what it opened and saved recorded. */
@@ -72,7 +74,12 @@ async function openView(opts: OpenOptions = {}) {
 				return {};
 			},
 		},
-		settings: { cardsPerBatch: 20, openIn: 'current' },
+		settings: {
+			cardsPerBatch: 20,
+			openIn: 'current',
+			useCategories: opts.useCategories ?? true,
+			useRatings: opts.useRatings ?? true,
+		},
 	};
 	/** What the plugin does after a build or a burst of live updates. */
 	const indexChanged = () => {
@@ -98,7 +105,21 @@ async function openView(opts: OpenOptions = {}) {
 			.map((a) => a.textContent);
 	const chip = (facet: string, value: string, x = false) =>
 		`[data-facet="${facet}"][data-value="${value}"]${x ? '[data-x]' : ':not([data-x])'}`;
-	return { view, root, $, click, status, cards, titles, chip, opened, saves, index, indexChanged };
+	return {
+		view,
+		root,
+		$,
+		click,
+		status,
+		cards,
+		titles,
+		chip,
+		opened,
+		saves,
+		index,
+		plugin,
+		indexChanged,
+	};
 }
 
 describe('the view', () => {
@@ -305,5 +326,38 @@ describe('commands', () => {
 		v.click(v.chip('tag', 'odd'));
 		v.view.clear();
 		assert.equal(v.status(), '25 pages');
+	});
+});
+
+describe('categories and ratings turned off', () => {
+	const sortValues = (v: Awaited<ReturnType<typeof openView>>) =>
+		Array.from((v.$('.publictxt-facets-sort') as HTMLSelectElement).options).map((o) => o.value);
+
+	test('a saved category filter is dropped', async () => {
+		const v = await openView({
+			useCategories: false,
+			state: { browse: { facets: { category: { inc: ['tech'] } } } },
+		});
+		assert.equal(v.status(), '25 pages');
+	});
+
+	test('a saved rating filter and rating sort are dropped, the rating sorts go', async () => {
+		const v = await openView({
+			useRatings: false,
+			state: { browse: { rating: '5', sort: 'rating asc' } },
+		});
+		assert.equal(v.status(), '25 pages');
+		assert.equal((v.$('.publictxt-facets-sort') as HTMLSelectElement).value, 'created');
+		assert.ok(!sortValues(v).some((s) => s.startsWith('rating')));
+	});
+
+	test('turning ratings off while open drops them at the rebuild', async () => {
+		const v = await openView();
+		v.click('[data-rating="5"]');
+		assert.equal(sortValues(v).length, 8);
+		v.plugin.settings.useRatings = false;
+		v.indexChanged();
+		assert.equal(v.status(), '25 pages');
+		assert.equal(sortValues(v).length, 6);
 	});
 });

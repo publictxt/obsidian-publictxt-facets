@@ -112,15 +112,21 @@ to Newest.
 | Excluded folders | none (Obsidian never indexes dot-folders) |
 | Top-level folder as a collection | on |
 | Tags from | front matter and inline |
-| Categories list | empty (any value) |
+| Use categories | on |
+| Categories list (shown while categories are used) | empty (any value) |
+| Use ratings | on |
 | Open notes in | current tab |
 | Cards per batch | 20 |
 
 The tab is declared (`getSettingDefinitions`, Obsidian 1.13+), so its settings appear in
 Obsidian's settings search. Every change goes through `normalizeSettings`, as `data.json` does.
-Excluded folders, folder as a collection, tags from and the categories list rebuild the index
-(the text areas once typing pauses). Excluded folders are one per line; categories one per line
-or comma-separated.
+**Use categories** off: pages carry no categories, so the category facet is gone. **Use ratings**
+off: every page is unrated, so the rating group, card stars and the two rating sorts are gone.
+The view drops a saved filter or sort for either, so nothing hidden narrows the results.
+
+Excluded folders, folder as a collection, tags from, both toggles and the categories list rebuild
+the index (the text areas once typing pauses). Excluded folders are one per line; categories one
+per line or comma-separated.
 
 ## Build order
 

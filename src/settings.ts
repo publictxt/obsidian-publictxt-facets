@@ -15,8 +15,12 @@ export interface PublicTxtFacetsSettings {
 	collectionFromFolder: boolean;
 	/** Where tags come from: front matter `tags`, inline `#tags`, or both. */
 	tagsFrom: TagsFrom;
+	/** Pages carry categories: off, the category facet is gone. */
+	useCategories: boolean;
 	/** Allowed categories, in display spelling. Empty: any value counts. */
 	categories: string[];
+	/** Pages carry ratings: off, every page is unrated and rating is gone. */
+	useRatings: boolean;
 	/** Where a card's title opens the note. */
 	openIn: OpenIn;
 	/** Cards shown before, and added by, "Show more". */
@@ -27,7 +31,9 @@ export const DEFAULT_SETTINGS: PublicTxtFacetsSettings = {
 	excludedFolders: [],
 	collectionFromFolder: true,
 	tagsFrom: 'both',
+	useCategories: true,
 	categories: [],
+	useRatings: true,
 	openIn: 'current',
 	cardsPerBatch: 20,
 };
@@ -69,8 +75,8 @@ export function normalizeSettings(raw: unknown): PublicTxtFacetsSettings {
 	// Folder names can hold commas; category names can't.
 	s.excludedFolders = stringList(r.excludedFolders, LINES) ?? s.excludedFolders;
 	s.categories = stringList(r.categories, LINES_OR_COMMAS) ?? s.categories;
-	if (typeof r.collectionFromFolder === 'boolean') {
-		s.collectionFromFolder = r.collectionFromFolder;
+	for (const key of ['collectionFromFolder', 'useCategories', 'useRatings'] as const) {
+		if (typeof r[key] === 'boolean') s[key] = r[key];
 	}
 	if (TAGS_FROM.includes(r.tagsFrom as TagsFrom)) {
 		s.tagsFrom = r.tagsFrom as TagsFrom;

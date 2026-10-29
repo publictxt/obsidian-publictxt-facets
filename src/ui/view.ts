@@ -28,7 +28,7 @@ import {
 import type PublicTxtFacetsPlugin from '../main.ts';
 import { INDEX_CHANGED } from '../page-index.ts';
 import { renderFilters } from './filters.ts';
-import { SORTS } from '../sort.ts';
+import { DEFAULT_SORT, parseSort, SORTS } from '../sort.ts';
 import { Results } from './results.ts';
 
 export const VIEW_TYPE = 'publictxt-facets';
@@ -56,6 +56,8 @@ export class FacetsView extends ItemView {
 	private built = false;
 	private titleEl!: HTMLInputElement;
 	private sortEl!: HTMLSelectElement;
+	/** Whether the sort menu offers the rating sorts; null before it's filled. */
+	private ratingSorts: boolean | null = null;
 	private compactEl!: HTMLElement;
 	/** The title filter's pending run, cancelled when the view closes. */
 	private typed: Debouncer<[], void> | null = null;
@@ -145,7 +147,6 @@ export class FacetsView extends ItemView {
 			cls: 'dropdown publictxt-facets-sort',
 			attr: { 'aria-label': 'Sort' },
 		});
-		for (const [value, label] of SORTS) this.sortEl.createEl('option', { value, text: label });
 		this.sortEl.addEventListener('change', () => {
 			this.state.sort = this.sortEl.value;
 			this.stateChanged();
@@ -197,10 +198,38 @@ export class FacetsView extends ItemView {
 		this.stateChanged();
 	}
 
+	/**
+	 * Drop what the settings turned off, so no filter the view can't show
+	 * narrows the results, and offer only the sorts that apply. Runs on each
+	 * index change, since those settings rebuild the index.
+	 */
+	private fitSettings(): void {
+		const { useCategories, useRatings } = this.plugin.settings;
+		if (!useCategories) {
+			this.state.facets.category.inc.clear();
+			this.state.facets.category.exc.clear();
+		}
+		if (!useRatings) {
+			this.state.rating = '';
+			if (parseSort(this.state.sort).field === 'rating') this.state.sort = DEFAULT_SORT;
+		}
+		// Refilled only when it changes, so a live update can't close an open menu.
+		if (this.ratingSorts !== useRatings) {
+			this.ratingSorts = useRatings;
+			this.sortEl.empty();
+			for (const [value, label] of SORTS) {
+				if (useRatings || parseSort(value).field !== 'rating') {
+					this.sortEl.createEl('option', { value, text: label });
+				}
+			}
+		}
+		this.sortEl.value = this.state.sort;
+	}
+
 	/** Draw the whole state into the controls, then the results. */
 	private showState(): void {
 		this.titleEl.value = this.state.title;
-		this.sortEl.value = this.state.sort;
+		this.fitSettings();
 		this.showCompact();
 		if (this.plugin.indexReady) this.onIndexChanged(false);
 	}
@@ -226,6 +255,7 @@ export class FacetsView extends ItemView {
 	 * elsewhere doesn't undo "Show more".
 	 */
 	private onIndexChanged(keepShown = true): void {
+		this.fitSettings();
 		const all = this.plugin.index.all();
 		const totals = countValues(all);
 		for (const d of FACETS) this.order[d.key] = sortedKeys(totals[d.key]);

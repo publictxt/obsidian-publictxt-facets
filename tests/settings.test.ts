@@ -13,10 +13,14 @@ describe('normalizeSettings', () => {
 			excludedFolders: ['settings/Templates'],
 			collectionFromFolder: false,
 			tagsFrom: 'frontmatter',
+			useCategories: false,
 			categories: ['Tech', 'Science'],
+			useRatings: false,
 			openIn: 'tab',
 			cardsPerBatch: 50,
 		});
+		assert.equal(s.useCategories, false);
+		assert.equal(s.useRatings, false);
 		assert.deepEqual(s.excludedFolders, ['settings/Templates']);
 		assert.equal(s.collectionFromFolder, false);
 		assert.equal(s.tagsFrom, 'frontmatter');
@@ -28,11 +32,13 @@ describe('normalizeSettings', () => {
 	test('malformed values fall back to their defaults', () => {
 		const s = normalizeSettings({
 			collectionFromFolder: 'yes',
+			useRatings: 1,
 			tagsFrom: 'everywhere',
 			openIn: 'popup',
 			cardsPerBatch: 0,
 		});
 		assert.equal(s.collectionFromFolder, true);
+		assert.equal(s.useRatings, true);
 		assert.equal(s.tagsFrom, 'both');
 		assert.equal(s.openIn, 'current');
 		assert.equal(s.cardsPerBatch, 20);

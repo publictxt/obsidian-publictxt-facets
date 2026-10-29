@@ -11,7 +11,9 @@ import {
 const OPTS: DeriveOptions = {
 	collectionFromFolder: true,
 	tagsFrom: 'both',
+	useCategories: true,
 	categories: [],
+	useRatings: true,
 };
 const T0 = Date.UTC(2020, 0, 1, 12);
 const T1 = Date.UTC(2021, 5, 1, 12);
@@ -128,6 +130,9 @@ describe('categories', () => {
 		const p = derive('w/x.md', fm, { categories: ['Tech', 'Science'] });
 		assert.deepEqual(p.categories, ['Science', 'Tech']);
 	});
+	test('none when categories are off', () => {
+		assert.deepEqual(derive('w/x.md', fm, { useCategories: false }).categories, []);
+	});
 });
 
 describe('tags', () => {
@@ -164,6 +169,9 @@ describe('rating', () => {
 	test('anything else is unrated', () => {
 		for (const v of ['0', '6', '3.5', 'great']) assert.equal(rating(v), 0, v);
 		assert.equal(derive('w/x.md', 'x').rating, 0);
+	});
+	test('unrated when ratings are off', () => {
+		assert.equal(derive('w/x.md', note('rating: 4'), { useRatings: false }).rating, 0);
 	});
 });
 
