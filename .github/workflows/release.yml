@@ -21,10 +21,13 @@ jobs:
                   node-version: 24
                   cache: 'npm'
 
+            # Test and lint as lint.yml does, so a tag can't ship what CI would fail.
             - name: Build plugin
               run: |
                   npm ci
                   npm run build
+                  npm test
+                  npm run lint
 
             - name: Check for optional styles
               id: styles

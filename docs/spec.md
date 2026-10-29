@@ -138,3 +138,5 @@ Each slice is usable in the test vault (`test-vaults/txt-cpy`) before the next s
 4. ✓ Chip facets: include/exclude, all/any, counts. Title filter.
 5. ✓ Rating and the sort menu.
 6. ✓ Live updates, saved state, settings tab, commands.
+7. Release 1.0.0: user README, release workflow tests and lints, submission to the community
+   directory.

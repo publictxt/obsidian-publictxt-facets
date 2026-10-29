@@ -15,7 +15,7 @@ repo was renamed to match, from `obsidian-txt-facets`; GitHub redirects the old 
 | Thing | Name | Notes |
 |---|---|---|
 | Repo | `publictxt/obsidian-publictxt-facets` | Obsidian's `obsidian-<id>` pattern. Local folders keep their old names. |
-| Plugin `id` (`manifest.json`) | `publictxt-facets` | Stable forever once released. Must match the vault folder `.obsidian/plugins/publictxt-facets/`. Obsidian rejects ids containing `obsidian`. |
+| Plugin `id` (`manifest.json`) | `publictxt-facets` | Fixed since 1.0.0. Must match the vault folder `.obsidian/plugins/publictxt-facets/`. Obsidian rejects ids containing `obsidian`. |
 | Display `name` | PublicTxt Facets | Shown in **Settings → Community plugins** and as the prefix of every command. |
 | `package.json` `name` | `publictxt-facets` | Same as the id; the package is private. |
 | View type | `publictxt-facets` | `VIEW_TYPE` in code. Also the hover-link source id. |
@@ -35,7 +35,7 @@ plugin name. (The archive's "Open PublicTxt search" showed up as
 | `like-this` | PublicTxt Facets: Show pages like this one |
 | `clear` | PublicTxt Facets: Clear |
 
-Command ids are stable API, like the plugin id: once released, don't rename them. Names are
+Command ids are stable API, like the plugin id: released in 1.0.0, so don't rename them. Names are
 only palette text and can change; hotkeys bind to ids. `filter-tag-under-cursor` keeps the id
 it had as "Filter by tag under cursor", renamed before release to need no lint exception.
 
