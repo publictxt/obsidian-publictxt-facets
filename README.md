@@ -8,7 +8,24 @@ or rating.
 
 ![Compact cards: one line each, with title, collections, date and stars](docs/screenshots/compact-view.png)
 
-It shares the concepts of [PublicTxt-Pages](https://github.com/publictxt/publictxt-pages)' browse lists and search page, so it suits a PublicTxt repository written in Obsidian. Nothing requires PublicTxt conventions, though: it works in any vault.
+It brings the browse lists of [PublicTxt-Pages](https://github.com/publictxt/publictxt-pages) into Obsidian, and works in any vault: nothing requires PublicTxt conventions.
+
+## PublicTxt and PublicTxt-Pages
+
+[PublicTxt](https://github.com/publictxt/publictext) keeps public knowledge (a blog, a wiki,
+notes, bookmarks) as plain Markdown in Git repositories, hosted for free. Its longer aim is
+selective aggregation: pulling chosen parts of other people's PublicTxt repositories into one
+local place to read and browse.
+
+[PublicTxt-Pages](https://github.com/publictxt/publictxt-pages) publishes a PublicTxt
+repository as a website on GitHub Pages, with no server: lists you can filter by collection,
+category and tag, a timeline, and full-text search. Obsidian is its recommended editor, since a
+vault is just a folder of Markdown files.
+
+This plugin is the site's browsing, inside Obsidian. It reads the same front matter and folder
+conventions (top-level folders as collections, front matter tags and inline hashtags as one tag
+set), so while you write, it shows roughly what the site will list. It is also meant to be the
+browsing part of PublicTxt's aggregate view, though it doesn't aggregate anything itself.
 
 ## Using it
 
