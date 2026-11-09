@@ -69,6 +69,17 @@ describe('title', () => {
 		assert.equal(p.title, 'Heading');
 		assert.equal(p.summary, 'Body.');
 	});
+	test('the H1 may follow front matter and blank lines', () => {
+		assert.equal(derive('wiki/a.md', note('tags: x', '\n\n# Heading\nBody.')).title, 'Heading');
+	});
+	test('an H1 further down is not the title', () => {
+		const p = derive('wiki/my-note.md', 'Intro.\n\n# Later\nBody.\n');
+		assert.equal(p.title, 'my note');
+		assert.equal(p.summary, 'Intro. Later Body.');
+	});
+	test('a lower heading on the first line is not the title', () => {
+		assert.equal(derive('wiki/my-note.md', '## Sub\n# Top\n').title, 'my note');
+	});
 	test('else the file name, with - and _ as spaces', () => {
 		assert.equal(derive('wiki/My note.md', 'Body.').title, 'My note');
 		assert.equal(derive('wiki/my-note_two.md', 'Body.').title, 'my note two');

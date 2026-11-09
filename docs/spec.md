@@ -17,14 +17,14 @@ A **page** is any `.md` file except:
 
 | Field | Rule |
 |---|---|
-| `title` | front matter `title`, else the first H1, else the file name with `-` and `_` as spaces. An `_index.md` takes its folder's name instead, with `-` as spaces (the root's stays `index`), as the site's sync step does |
+| `title` | front matter `title`, else the H1 on the first content line (the first non-blank line after the front matter), else the file name with `-` and `_` as spaces. An `_index.md` takes its folder's name instead, with `-` as spaces (the root's stays `index`), as the site's sync step does |
 | `collections` | top-level folder (setting; `page` at root) ∪ front matter `collections` (value or list) ∪ `bookmarks` if there's a bookmark URL. Lower-case, deduped |
 | `categories` | front matter `categories` / `category` (value or list), case-insensitive. With a settings list: only listed values, in the list's spelling. With an empty list: any value, lower-case |
 | `tags` | front matter `tags` and/or inline `#tags` (setting), via Obsidian's metadata cache. Lower-case, no `#`, deduped |
 | `rating` | front matter `rating`, integer 1–5; else unrated |
 | `created` | front matter `created` (or `date`), else `YYYYMMDD` / `YYYY-MM-DD` in the file name or a `/YYYY/MM/DD/` path, else file ctime |
 | `updated` | front matter `updated` (or `lastmod`), else file mtime; never before `created` |
-| `summary` | first 30 words of the body, without front matter or the title H1 |
+| `summary` | first 30 words of the body, without front matter or the title H1 (the first-line H1) |
 | `bookmarks` | front matter `bookmark` / `bookmarks`, `http(s)` URLs only |
 
 ## Filtering

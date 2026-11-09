@@ -11,7 +11,7 @@ import type { CachedMetadata } from 'obsidian';
 import type { TagsFrom, PublicTxtFacetsSettings } from '../settings.ts';
 import { deriveDates } from './dates.ts';
 import { fmString, fmTagList, fmValues, type FrontMatter } from './front-matter.ts';
-import { deriveSummary } from './plain-text.ts';
+import { deriveSummary, leadingH1 } from './plain-text.ts';
 
 export interface PageItem {
 	path: string;
@@ -99,7 +99,7 @@ function dedupe(values: string[]): string[] {
 // ---- title, collections, categories, tags, rating, bookmarks -----------------
 
 /**
- * The title when there's no `title:` and no H1, as the site's sync step
+ * The title when there's no `title:` and no H1 on the first content line, as the site's sync step
  * makes it: the file name with `-` and `_` as spaces; a folder index takes
  * its folder's name, with `-` as spaces. The root index has no folder, so
  * it falls back to its file name ("index").
@@ -114,12 +114,12 @@ export function fallbackTitle(file: Pick<FileInfo, 'path' | 'name' | 'basename'>
 
 export function deriveTitle(
 	fm: FrontMatter,
-	cache: CachedMetadata | null | undefined,
+	text: string,
 	file: Pick<FileInfo, 'path' | 'name' | 'basename'>,
 ): { title: string; fromH1: boolean } {
 	const explicit = fmString(fm.title);
 	if (explicit) return { title: explicit, fromH1: false };
-	const h1 = cache?.headings?.find((h) => h.level === 1)?.heading.trim();
+	const h1 = leadingH1(text)?.heading;
 	if (h1) return { title: h1, fromH1: true };
 	return { title: fallbackTitle(file), fromH1: false };
 }
@@ -209,7 +209,7 @@ export function derivePage(
 	opts: DeriveOptions,
 ): PageItem {
 	const fm: FrontMatter = cache?.frontmatter ?? {};
-	const { title, fromH1 } = deriveTitle(fm, cache, file);
+	const { title, fromH1 } = deriveTitle(fm, text, file);
 	const bookmarks = deriveBookmarks(fm);
 	return {
 		path: file.path,
