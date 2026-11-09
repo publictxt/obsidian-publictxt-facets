@@ -89,6 +89,7 @@ None has a default hotkey. Set one in **Settings → Hotkeys**.
 |---|---|
 | Excluded folders | none |
 | Top-level folder as a collection | on |
+| Use first top level heading as title | on. Off: a page without a front matter `title` takes its file name |
 | Tags from | front matter and inline |
 | Use categories | on |
 | Categories | empty: any value counts. List yours to count only those |
