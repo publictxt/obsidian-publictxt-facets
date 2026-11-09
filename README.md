@@ -119,7 +119,7 @@ npm run lint
 npm run deploy [-- <vault>]   # build and copy into <vault>/.obsidian/plugins/publictxt-facets/
 ```
 
-`deploy` defaults to the test vault at `../../test-vaults/txt-cpy`. Design notes are in `docs/`:
+`deploy` defaults to the test vault at `../test-vaults/txt-cpy`. Design notes are in `docs/`:
 `intent.md` (why), `spec.md` (what), and `naming.md` (names and vocabulary).
 
 ## License

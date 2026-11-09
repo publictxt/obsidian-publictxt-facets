@@ -53,7 +53,7 @@ npm run dev       # rebuild main.js on change
 npm run build     # type-check (src and tests) and minified build
 npm test          # node --test; needs Node 22.18+ (runs TypeScript directly)
 npm run lint
-npm run deploy [-- <vault>]   # build, copy into the test vault (../../test-vaults/txt-cpy)
+npm run deploy [-- <vault>]   # build, copy into the test vault (../test-vaults/txt-cpy)
 ```
 
 Run test, build and lint before committing. CI runs all three on Node 24.

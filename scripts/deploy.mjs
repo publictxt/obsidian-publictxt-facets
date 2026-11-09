@@ -6,7 +6,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const vault = resolve(process.argv[2] ?? join(root, '../../test-vaults/txt-cpy'));
+const vault = resolve(process.argv[2] ?? join(root, '../test-vaults/txt-cpy'));
 const { id } = JSON.parse(readFileSync(join(root, 'manifest.json'), 'utf8'));
 
 if (!existsSync(join(vault, '.obsidian'))) {
