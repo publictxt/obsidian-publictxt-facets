@@ -38,7 +38,7 @@ export interface FileInfo {
 
 export type DeriveOptions = Pick<
 	PublicTxtFacetsSettings,
-	'collectionFromFolder' | 'tagsFrom' | 'useCategories' | 'categories' | 'useRatings'
+	'collectionFromFolder' | 'headingAsTitle' | 'tagsFrom' | 'useCategories' | 'categories' | 'useRatings'
 >;
 
 // ---- which files are pages ------------------------------------------------
@@ -116,10 +116,11 @@ export function deriveTitle(
 	fm: FrontMatter,
 	text: string,
 	file: Pick<FileInfo, 'path' | 'name' | 'basename'>,
+	useHeading = true,
 ): { title: string; fromH1: boolean } {
 	const explicit = fmString(fm.title);
 	if (explicit) return { title: explicit, fromH1: false };
-	const h1 = leadingH1(text)?.heading;
+	const h1 = useHeading ? leadingH1(text)?.heading : undefined;
 	if (h1) return { title: h1, fromH1: true };
 	return { title: fallbackTitle(file), fromH1: false };
 }
@@ -209,7 +210,7 @@ export function derivePage(
 	opts: DeriveOptions,
 ): PageItem {
 	const fm: FrontMatter = cache?.frontmatter ?? {};
-	const { title, fromH1 } = deriveTitle(fm, text, file);
+	const { title, fromH1 } = deriveTitle(fm, text, file, opts.headingAsTitle);
 	const bookmarks = deriveBookmarks(fm);
 	return {
 		path: file.path,

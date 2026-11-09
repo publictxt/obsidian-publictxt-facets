@@ -13,7 +13,7 @@ type Key = keyof PublicTxtFacetsSettings;
 const TYPING_MS = 600;
 
 /** Rebuild at once: a toggle or a dropdown. */
-const REBUILD_NOW: readonly Key[] = ['collectionFromFolder', 'tagsFrom', 'useCategories', 'useRatings'];
+const REBUILD_NOW: readonly Key[] = ['collectionFromFolder', 'headingAsTitle', 'tagsFrom', 'useCategories', 'useRatings'];
 /** Rebuild once typing pauses: the text areas. */
 const REBUILD_SOON: readonly Key[] = ['excludedFolders', 'categories'];
 
@@ -64,6 +64,11 @@ export class PublicTxtFacetsSettingTab extends PluginSettingTab {
 				desc: 'One per line, or separated by commas. Only these count, in this spelling. Empty: any value counts.',
 				control: { type: 'textarea', key: 'categories', rows: 4 },
 				visible: () => this.plugin.settings.useCategories,
+			},
+			{
+				name: 'Use first top level heading as title',
+				desc: "A note's title is its `# heading` when that is the first line after the front matter. A front matter title still wins. Off: the title is the file name.",
+				control: { type: 'toggle', key: 'headingAsTitle' },
 			},
 			{
 				name: 'Use ratings',

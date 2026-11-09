@@ -12,6 +12,7 @@ describe('normalizeSettings', () => {
 		const s = normalizeSettings({
 			excludedFolders: ['settings/Templates'],
 			collectionFromFolder: false,
+			headingAsTitle: false,
 			tagsFrom: 'frontmatter',
 			useCategories: false,
 			categories: ['Tech', 'Science'],
@@ -21,6 +22,7 @@ describe('normalizeSettings', () => {
 		});
 		assert.equal(s.useCategories, false);
 		assert.equal(s.useRatings, false);
+		assert.equal(s.headingAsTitle, false);
 		assert.deepEqual(s.excludedFolders, ['settings/Templates']);
 		assert.equal(s.collectionFromFolder, false);
 		assert.equal(s.tagsFrom, 'frontmatter');

@@ -13,6 +13,8 @@ export interface PublicTxtFacetsSettings {
 	excludedFolders: string[];
 	/** A page's top-level folder is one of its collections (`page` at root). */
 	collectionFromFolder: boolean;
+	/** A `# heading` on a note's first content line is its title. */
+	headingAsTitle: boolean;
 	/** Where tags come from: front matter `tags`, inline `#tags`, or both. */
 	tagsFrom: TagsFrom;
 	/** Pages carry categories: off, the category facet is gone. */
@@ -30,6 +32,7 @@ export interface PublicTxtFacetsSettings {
 export const DEFAULT_SETTINGS: PublicTxtFacetsSettings = {
 	excludedFolders: [],
 	collectionFromFolder: true,
+	headingAsTitle: true,
 	tagsFrom: 'both',
 	useCategories: true,
 	categories: [],
@@ -75,7 +78,7 @@ export function normalizeSettings(raw: unknown): PublicTxtFacetsSettings {
 	// Folder names can hold commas; category names can't.
 	s.excludedFolders = stringList(r.excludedFolders, LINES) ?? s.excludedFolders;
 	s.categories = stringList(r.categories, LINES_OR_COMMAS) ?? s.categories;
-	for (const key of ['collectionFromFolder', 'useCategories', 'useRatings'] as const) {
+	for (const key of ['collectionFromFolder', 'headingAsTitle', 'useCategories', 'useRatings'] as const) {
 		if (typeof r[key] === 'boolean') s[key] = r[key];
 	}
 	if (TAGS_FROM.includes(r.tagsFrom as TagsFrom)) {

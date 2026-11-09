@@ -111,6 +111,7 @@ to Newest.
 |---|---|
 | Excluded folders | none (Obsidian never indexes dot-folders) |
 | Top-level folder as a collection | on |
+| Use first top level heading as title | on |
 | Tags from | front matter and inline |
 | Use categories | on |
 | Categories list (shown while categories are used) | empty (any value) |
@@ -124,7 +125,10 @@ Obsidian's settings search. Every change goes through `normalizeSettings`, as `d
 off: every page is unrated, so the rating group, card stars and the two rating sorts are gone.
 The view drops a saved filter or sort for either, so nothing hidden narrows the results.
 
-Excluded folders, folder as a collection, tags from, both toggles and the categories list rebuild
+**Use first top level heading as title** off: a page with no `title:` takes its file name, and its
+first-line H1 stays in the summary.
+
+Excluded folders, folder as a collection, heading as title, tags from, both toggles and the categories list rebuild
 the index (the text areas once typing pauses). Excluded folders are one per line; categories one
 per line or comma-separated.
 
