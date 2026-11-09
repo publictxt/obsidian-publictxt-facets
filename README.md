@@ -60,7 +60,7 @@ Every Markdown note is a page, except notes in excluded folders, `README.md`, `L
 
 | Field | From |
 |---|---|
-| Title | front matter `title`, else the first `# heading`, else the file name |
+| Title | front matter `title`, else a `# heading` on the first content line, else the file name |
 | Collections | the note's top-level folder (`page` at the root), front matter `collections`, and `bookmarks` if it has a bookmark URL |
 | Categories | front matter `category` or `categories` |
 | Tags | front matter `tags` and inline `#tags` |

@@ -17,14 +17,14 @@ A **page** is any `.md` file except:
 
 | Field | Rule |
 |---|---|
-| `title` | front matter `title`, else the first H1, else the file name with `-` and `_` as spaces. An `_index.md` takes its folder's name instead, with `-` as spaces (the root's stays `index`), as the site's sync step does |
+| `title` | front matter `title`, else the H1 on the first content line (the first non-blank line after the front matter), else the file name with `-` and `_` as spaces. An `_index.md` takes its folder's name instead, with `-` as spaces (the root's stays `index`), as the site's sync step does |
 | `collections` | top-level folder (setting; `page` at root) ∪ front matter `collections` (value or list) ∪ `bookmarks` if there's a bookmark URL. Lower-case, deduped |
 | `categories` | front matter `categories` / `category` (value or list), case-insensitive. With a settings list: only listed values, in the list's spelling. With an empty list: any value, lower-case |
 | `tags` | front matter `tags` and/or inline `#tags` (setting), via Obsidian's metadata cache. Lower-case, no `#`, deduped |
 | `rating` | front matter `rating`, integer 1–5; else unrated |
 | `created` | front matter `created` (or `date`), else `YYYYMMDD` / `YYYY-MM-DD` in the file name or a `/YYYY/MM/DD/` path, else file ctime |
 | `updated` | front matter `updated` (or `lastmod`), else file mtime; never before `created` |
-| `summary` | first 30 words of the body, without front matter or the title H1 |
+| `summary` | first 30 words of the body, without front matter or the title H1 (the first-line H1) |
 | `bookmarks` | front matter `bookmark` / `bookmarks`, `http(s)` URLs only |
 
 ## Filtering
@@ -111,6 +111,7 @@ to Newest.
 |---|---|
 | Excluded folders | none (Obsidian never indexes dot-folders) |
 | Top-level folder as a collection | on |
+| Use first top level heading as title | on |
 | Tags from | front matter and inline |
 | Use categories | on |
 | Categories list (shown while categories are used) | empty (any value) |
@@ -124,7 +125,10 @@ Obsidian's settings search. Every change goes through `normalizeSettings`, as `d
 off: every page is unrated, so the rating group, card stars and the two rating sorts are gone.
 The view drops a saved filter or sort for either, so nothing hidden narrows the results.
 
-Excluded folders, folder as a collection, tags from, both toggles and the categories list rebuild
+**Use first top level heading as title** off: a page with no `title:` takes its file name, and its
+first-line H1 stays in the summary.
+
+Excluded folders, folder as a collection, heading as title, tags from, both toggles and the categories list rebuild
 the index (the text areas once typing pauses). Excluded folders are one per line; categories one
 per line or comma-separated.
 

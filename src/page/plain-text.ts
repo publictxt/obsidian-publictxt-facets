@@ -9,9 +9,21 @@ export function stripFrontMatter(text: string): string {
 	return text.replace(FRONT_MATTER_RE, '');
 }
 
-/** Remove the first ATX level-1 heading line. */
-export function removeFirstH1(body: string): string {
-	return body.replace(/^[ \t]{0,3}#[ \t]+[^\n]*\r?\n?/m, '');
+// An ATX level-1 heading line: `# Title`.
+const H1_LINE_RE = /^[ \t]{0,3}#[ \t]+(.*?)[ \t]*$/;
+
+/**
+ * The note's title heading: an ATX level-1 heading on the first content
+ * line, the first non-blank line after the front matter. Null when that
+ * line is anything else, so a `# heading` further down is not a title.
+ * `rest` is the body after that line.
+ */
+export function leadingH1(text: string): { heading: string; rest: string } | null {
+	const body = stripFrontMatter(text);
+	const m = /^(?:[ \t]*\r?\n)*([^\r\n]*)(?:\r?\n)?/.exec(body);
+	const h = m ? H1_LINE_RE.exec(m[1]!) : null;
+	if (!m || !h || !h[1]) return null;
+	return { heading: h[1], rest: body.slice(m[0].length) };
 }
 
 /**
@@ -47,8 +59,7 @@ export function firstWords(text: string, n = SUMMARY_WORDS): string {
 
 /** The body's first words: no front matter, no title heading. */
 export function deriveSummary(text: string, titleFromH1: boolean): string {
-	let body = stripFrontMatter(text);
-	if (titleFromH1) body = removeFirstH1(body);
-	return firstWords(plainText(body));
+	const lead = titleFromH1 ? leadingH1(text) : null;
+	return firstWords(plainText(lead ? lead.rest : stripFrontMatter(text)));
 }
 

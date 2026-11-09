@@ -10,6 +10,7 @@ import {
 
 const OPTS: DeriveOptions = {
 	collectionFromFolder: true,
+	headingAsTitle: true,
 	tagsFrom: 'both',
 	useCategories: true,
 	categories: [],
@@ -68,6 +69,22 @@ describe('title', () => {
 		const p = derive('wiki/a.md', '# Heading\nBody.\n');
 		assert.equal(p.title, 'Heading');
 		assert.equal(p.summary, 'Body.');
+	});
+	test('the H1 may follow front matter and blank lines', () => {
+		assert.equal(derive('wiki/a.md', note('tags: x', '\n\n# Heading\nBody.')).title, 'Heading');
+	});
+	test('an H1 further down is not the title', () => {
+		const p = derive('wiki/my-note.md', 'Intro.\n\n# Later\nBody.\n');
+		assert.equal(p.title, 'my note');
+		assert.equal(p.summary, 'Intro. Later Body.');
+	});
+	test('a lower heading on the first line is not the title', () => {
+		assert.equal(derive('wiki/my-note.md', '## Sub\n# Top\n').title, 'my note');
+	});
+	test('with the setting off, the H1 is not the title and stays in the summary', () => {
+		const p = derive('wiki/my-note.md', '# Heading\nBody.\n', { headingAsTitle: false });
+		assert.equal(p.title, 'my note');
+		assert.equal(p.summary, 'Heading Body.');
 	});
 	test('else the file name, with - and _ as spaces', () => {
 		assert.equal(derive('wiki/My note.md', 'Body.').title, 'My note');
